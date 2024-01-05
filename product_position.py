@@ -134,7 +134,15 @@ def get_product_position(mask):
   return row_position, col_position
 
 
-def row_col_position(img_path,product_type, token="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"):
+### 
+#inupt: 
+#   path to image, 
+#   prodction type
+#output: 
+#   row positon: the row where the very top pixel of the product is located
+#   col positon: the column where the very left pixel of the product is located
+###
+def row_col_position(img_path, product_type):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     ckpt_repo_id = "ShilongLiu/GroundingDINO"
