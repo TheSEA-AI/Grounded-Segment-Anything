@@ -142,7 +142,7 @@ def row_col_position(img_path,product_type, token="hf_kubsiaqrDrXbLXceBXzxfgEBBm
     ckpt_config_filename = "GroundingDINO_SwinB.cfg.py"
 
 
-    groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename, device, token)
+    groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename, device)
 
     sam_hq_vit_url = "https://huggingface.co/lkeab/hq-sam/resolve/main/sam_hq_vit_h.pth"
     wget.download(sam_hq_vit_url)
