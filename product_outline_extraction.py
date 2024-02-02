@@ -54,7 +54,7 @@ def parse_args(input_args=None):
                         required=True, 
                         help="Path to the image.")
 
-    parser.add_argument("--ouput_dir", 
+    parser.add_argument("--output_dir", 
                         default=None, 
                         type=str, 
                         required=True, 
