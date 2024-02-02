@@ -176,7 +176,7 @@ def product_mask_extraction(img_path, product_type = "cosmetic product"):
     mask_all = np.full((image_source.shape[1],image_source.shape[1]), True, dtype=bool)
 
     if detected_boxes.size(0) != 0:
-        segmented_frame_masks = segment(image_source, sam_predictor, boxes=detected_boxes)
+        segmented_frame_masks = segment(image_source, sam_predictor, boxes=detected_boxes, device=device)
 
         for mask in segmented_frame_masks:
             mask_all = mask_all & ~mask[0].cpu().numpy()
