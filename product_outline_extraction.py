@@ -1,6 +1,7 @@
 import os, sys
 
 sys.path.append(os.path.join(os.getcwd(), "GroundingDINO"))
+sys.path.append(os.path.join(os.getcwd(), "ControlNOLA"))
 
 import argparse
 import copy
