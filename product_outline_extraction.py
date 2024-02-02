@@ -215,7 +215,7 @@ def product_outline_extraction(intput_dir, output_dir, product_type = "cosmetic 
 
 if __name__ == "__main__":
     args = parse_args()
-    product_outline_extraction(args.intput_dir, args.output_dir)
+    product_outline_extraction(args.input_dir, args.output_dir)
     print(f'process finished.')
     #row_position, col_position = row_col_position(args.img_path, args.product_type)
     #print(f'row_position={row_position},col_position={col_position}')
