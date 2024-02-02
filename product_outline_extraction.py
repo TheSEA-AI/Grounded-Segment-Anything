@@ -190,21 +190,53 @@ def product_mask_extraction(img_path, product_type = "cosmetic product"):
 def product_outline_extraction(intput_dir, output_dir, product_type = "cosmetic product", image_resolution = 1024):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True) 
-    
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    ckpt_repo_id = "ShilongLiu/GroundingDINO"
+    ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
+    ckpt_config_filename = "GroundingDINO_SwinB.cfg.py"
+
+    groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename, device)
+
+    sam_checkpoint_file = Path("./sam_hq_vit_h.pth")
+    if not sam_checkpoint_file.is_file():
+        sam_hq_vit_url = "https://huggingface.co/lkeab/hq-sam/resolve/main/sam_hq_vit_h.pth"
+        wget.download(sam_hq_vit_url)
+
+    sam_checkpoint = "sam_hq_vit_h.pth"
+    sam_predictor = SamPredictor(build_sam_hq_vit_h(checkpoint=sam_checkpoint).to(device))
+
     image_filename_list = [i for i in os.listdir(intput_dir)]
     images_path = [os.path.join(intput_dir, file_path)
                         for file_path in image_filename_list]
 
     for img_path, img_name in zip(images_path, image_filename_list):
-        mask = product_mask_extraction(img_path, product_type)
-        mask = mask * np.uint8(255) 
+        #mask = product_mask_extraction(img_path, product_type)
+        #####################################
+        #extract mask
+        image_source, image = load_image(img_path)
+        _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model)
+        mask_all = np.full((image_source.shape[1],image_source.shape[1]), True, dtype=bool)
+
+        if detected_boxes.size(0) != 0:
+            segmented_frame_masks = segment(image_source, sam_predictor, boxes=detected_boxes, device=device)
+
+            for mask in segmented_frame_masks:
+                mask_all = mask_all & ~mask[0].cpu().numpy()
+        else:
+            raise ValueError("the product cannot be extracted.")
+
+        mask_all = np.stack((mask_all,)*3, axis=-1)
+        ################
+
+        mask_all = mask_all * np.uint8(255) 
 
         hedDetector = HEDdetector()
         img = Image.open(img_path).convert("RGB")
         image_array = np.asarray(img)
         image_array = np.where(image_array == 0, 255, image_array)
         #print(f'image_array before = {image_array}')
-        image_array = image_array * mask 
+        image_array = image_array * mask_all 
         image_array = np.where(image_array == 0, image_array, 255)
         #print(f'image_array after = {image_array}')
         
