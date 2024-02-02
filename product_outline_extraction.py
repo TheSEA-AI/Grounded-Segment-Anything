@@ -154,7 +154,22 @@ def get_product_position(mask):
 #   row positon: the row where the very top pixel of the product is located
 #   col positon: the column where the very left pixel of the product is located
 ###
-def product_mask_extraction(img_path, groundingdino_model, sam_predictor, device, product_type = "cosmetic product"):
+def product_mask_extraction(img_path, product_type = "cosmetic product"):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    ckpt_repo_id = "ShilongLiu/GroundingDINO"
+    ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
+    ckpt_config_filename = "GroundingDINO_SwinB.cfg.py"
+
+    groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename, device)
+
+    sam_checkpoint_file = Path("./sam_hq_vit_h.pth")
+    if not sam_checkpoint_file.is_file():
+        sam_hq_vit_url = "https://huggingface.co/lkeab/hq-sam/resolve/main/sam_hq_vit_h.pth"
+        wget.download(sam_hq_vit_url)
+
+    sam_checkpoint = "sam_hq_vit_h.pth"
+    sam_predictor = SamPredictor(build_sam_hq_vit_h(checkpoint=sam_checkpoint).to(device))
 
     image_source, image = load_image(img_path)
     _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model)
@@ -172,7 +187,7 @@ def product_mask_extraction(img_path, groundingdino_model, sam_predictor, device
 
     return mask_all
 
-def product_outline_extraction(intput_dir, output_dir, groundingdino_model, sam_predictor, device, product_type = "cosmetic product", image_resolution = 1024):
+def product_outline_extraction(intput_dir, output_dir, product_type = "cosmetic product", image_resolution = 1024):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True) 
     
@@ -181,13 +196,13 @@ def product_outline_extraction(intput_dir, output_dir, groundingdino_model, sam_
                         for file_path in image_filename_list]
 
     for img_path, img_name in zip(images_path, image_filename_list):
-        mask = product_mask_extraction(img_path, product_type, groundingdino_model, sam_predictor, device)
+        mask = product_mask_extraction(img_path, product_type)
         mask = mask * np.uint8(255) 
 
         hedDetector = HEDdetector()
         img = Image.open(img_path).convert("RGB")
         image_array = np.asarray(img)
-        image_array = np.where(image_array == 0, image_array+1, image_array)
+        image_array = np.where(image_array == 0, 255, image_array)
         #print(f'image_array before = {image_array}')
         image_array = image_array * mask 
         image_array = np.where(image_array == 0, image_array, 255)
@@ -204,23 +219,7 @@ def product_outline_extraction(intput_dir, output_dir, groundingdino_model, sam_
 
 if __name__ == "__main__":
     args = parse_args()
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    ckpt_repo_id = "ShilongLiu/GroundingDINO"
-    ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
-    ckpt_config_filename = "GroundingDINO_SwinB.cfg.py"
-
-    groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename, device)
-
-    sam_checkpoint_file = Path("./sam_hq_vit_h.pth")
-    if not sam_checkpoint_file.is_file():
-        sam_hq_vit_url = "https://huggingface.co/lkeab/hq-sam/resolve/main/sam_hq_vit_h.pth"
-        wget.download(sam_hq_vit_url)
-
-    sam_checkpoint = "sam_hq_vit_h.pth"
-    sam_predictor = SamPredictor(build_sam_hq_vit_h(checkpoint=sam_checkpoint).to(device))
-
-    product_outline_extraction(args.input_dir, args.output_dir, groundingdino_model, sam_predictor,device)
+    product_outline_extraction(args.input_dir, args.output_dir)
     print(f'process finished.')
     #row_position, col_position = row_col_position(args.img_path, args.product_type)
     #print(f'row_position={row_position},col_position={col_position}')
