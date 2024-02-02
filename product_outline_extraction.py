@@ -201,15 +201,16 @@ def product_outline_extraction(intput_dir, output_dir, product_type = "cosmetic 
 
         hedDetector = HEDdetector()
         img = Image.open(img_path).convert("RGB")
-    
+        print(f'image_array before = {image_array}')
         image_array = np.asarray(img) * mask 
+        print(f'image_array after = {image_array}')
         
         hed = HWC3(image_array)
         hed = hedDetector(hed)
         hed = HWC3(hed)
         hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
         img_masked = Image.fromarray(hed)
-        img_save_path = output_dir + img_name
+        img_save_path = output_dir + '/' + img_name
         img_masked.save(img_save_path, 'jpeg')
 
 
