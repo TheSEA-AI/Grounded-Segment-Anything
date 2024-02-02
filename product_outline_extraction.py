@@ -47,7 +47,13 @@ locale.getpreferredencoding = lambda: "UTF-8"
 def parse_args(input_args=None):
     parser = argparse.ArgumentParser(description="Simple example of product position extraction based on Grouned SAM.")
 
-    parser.add_argument("--img_path", 
+    parser.add_argument("--input_dir", 
+                        default=None, 
+                        type=str, 
+                        required=True, 
+                        help="Path to the image.")
+
+    parser.add_argument("--ouput_dir", 
                         default=None, 
                         type=str, 
                         required=True, 
@@ -56,7 +62,7 @@ def parse_args(input_args=None):
     parser.add_argument("--product_type", 
                         default=None, 
                         type=str, 
-                        required=True,
+                        required=False,
                         help="The type of the product.")
 
     if input_args is not None:
@@ -180,26 +186,35 @@ def product_mask_extraction(img_path, product_type = "cosmetic product"):
 
     return mask_all
 
-def product_outline_extraction(img_path, product_type = "cosmetic product", image_resolution = 1024):
+def product_outline_extraction(intput_dir, output_dir, product_type = "cosmetic product", image_resolution = 1024):
 
-    mask = product_mask_extraction(img_path, product_type)
-    mask = mask * np.uint8(255) 
+    Path(output_dir).mkdir(parents=True, exist_ok=True) 
+    
+    image_filename_list = [i for i in os.listdir(intput_dir)]
+    images_path = [os.path.join(intput_dir, file_path)
+                        for file_path in image_filename_list]
 
-    hedDetector = HEDdetector()
-    img = Image.open(img_path).convert("RGB")
-  
-    image_array = np.asarray(img) * mask 
+    for img_path, img_name in zip(images_path, image_filename_list):
+        mask = product_mask_extraction(img_path, product_type)
+        mask = mask * np.uint8(255) 
+
+        hedDetector = HEDdetector()
+        img = Image.open(img_path).convert("RGB")
     
-    hed = HWC3(image_array)
-    hed = hedDetector(hed)
-    hed = HWC3(hed)
-    hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
-    img_masked = Image.fromarray(hed)
-    
-    return img_masked
+        image_array = np.asarray(img) * mask 
+        
+        hed = HWC3(image_array)
+        hed = hedDetector(hed)
+        hed = HWC3(hed)
+        hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
+        img_masked = Image.fromarray(hed)
+        img_save_path = output_dir + img_name
+        img_masked.save(img_save_path, 'jpeg')
 
 
 if __name__ == "__main__":
     args = parse_args()
+    product_outline_extraction(args.intput_dir, args.output_dir)
+    print(f'process finished.')
     #row_position, col_position = row_col_position(args.img_path, args.product_type)
     #print(f'row_position={row_position},col_position={col_position}')
