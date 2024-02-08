@@ -61,7 +61,7 @@ def parse_args(input_args=None):
                         help="Path to the image.")
     
     parser.add_argument("--img_format", 
-                        default='.png', 
+                        default='png', 
                         type=str, 
                         help="Path to the image.")
     
