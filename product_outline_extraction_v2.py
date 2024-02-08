@@ -60,6 +60,11 @@ def parse_args(input_args=None):
                         required=True, 
                         help="Path to the image.")
     
+    parser.add_argument("--img_format", 
+                        default='.png', 
+                        type=str, 
+                        help="Path to the image.")
+    
     parser.add_argument("--product_type", 
                         default=None, 
                         type=str, 
@@ -187,7 +192,7 @@ def product_mask_extraction(img_path, product_type = "cosmetic product"):
 
     return mask_all
 
-def product_outline_extraction(intput_dir, output_dir, product_type = "cosmetic product", image_resolution = 1024):
+def product_outline_extraction(intput_dir, output_dir, img_format = '.png', product_type = "cosmetic product", image_resolution = 1024):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True) 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -239,12 +244,12 @@ def product_outline_extraction(intput_dir, output_dir, product_type = "cosmetic 
         hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
         img_masked = Image.fromarray(hed)
         img_save_path = output_dir + '/' + img_name
-        img_masked.save(img_save_path, 'jpeg')
+        img_masked.save(img_save_path, img_format)
 
 
 if __name__ == "__main__":
     args = parse_args()
-    product_outline_extraction(args.input_dir, args.output_dir)
+    product_outline_extraction(args.input_dir, args.output_dir, args.img_format)
     print(f'process finished.')
     #row_position, col_position = row_col_position(args.img_path, args.product_type)
     #print(f'row_position={row_position},col_position={col_position}')
