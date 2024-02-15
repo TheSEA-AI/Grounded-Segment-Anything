@@ -18,7 +18,7 @@ from GroundingDINO.groundingdino.util import box_ops
 from GroundingDINO.groundingdino.util.slconfig import SLConfig
 from GroundingDINO.groundingdino.util.utils import clean_state_dict, get_phrases_from_posmap
 from GroundingDINO.groundingdino.util.inference import annotate, load_image, predict
-from transformers import pipeline
+#from transformers import pipeline
 
 import supervision as sv
 
