@@ -237,7 +237,7 @@ def product_outline_extraction(intput_dir, output_dir, img_format = '.png', prod
 
         img = Image.open(img_path).convert("RGB")
         image_array = np.asarray(img)
-        img[:,:,:] = 255
+        image_array[:,:,:] = 255
         image_array = image_array * mask_all 
         #image_array = np.where(image_array == 0, image_array, 255)
         #print(f'image_array after = {image_array}')
