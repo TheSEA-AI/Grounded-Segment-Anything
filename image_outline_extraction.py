@@ -241,12 +241,12 @@ def product_outline_extraction(intput_dir, output_dir, img_format = '.png', prod
         image_array = np.asarray(img)
         #image_array = np.where(image_array == 0, 255, image_array)
         #print(f'image_array before = {image_array}')
-        #image_array = image_array * mask_all 
+        image_array = image_array * mask_all 
         #image_array = np.where(image_array == 0, image_array, 255)
         #print(f'image_array after = {image_array}')
         
         hed = HWC3(image_array)
-        hed = hedDetector(hed) * mask_all[:,:,0]
+        hed = hedDetector(hed) #* mask_all[:,:,0]
         hed = HWC3(hed)
         hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
         img_masked = Image.fromarray(hed)
