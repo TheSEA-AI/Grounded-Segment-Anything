@@ -216,6 +216,7 @@ def product_outline_extraction(intput_dir, output_dir, img_format = '.png', prod
                         for file_path in image_filename_list]
 
     hedDetector = HEDdetector()
+    kernel = np.ones((3, 3), np.uint8)
     for img_path, img_name in zip(images_path, image_filename_list):
         #mask = product_mask_extraction(img_path, product_type)
         #####################################
@@ -234,17 +235,18 @@ def product_outline_extraction(intput_dir, output_dir, img_format = '.png', prod
 
         mask_all = np.stack((mask_all,)*3, axis=-1)
         ################
-        mask_all = mask_all * np.uint8(255) 
+    
+        mask = ~mask_all
+        mask = mask.astype(np.uint8)     
+        mask = cv2.dilate(mask, kernel, iterations=3) 
+        mask = np.array(mask, dtype=bool)
 
         img = Image.open(img_path).convert("RGB")
         image_array = np.asarray(img)
-        image_array = np.where(image_array >= 0, np.uint8(255), np.uint8(255))
-        image_array = image_array * mask_all 
-        image_array = np.where(image_array > 0, np.uint8(255), image_array)
-        #print(f'image_array after = {image_array}')
-        
+
         hed = HWC3(image_array)
-        hed = hedDetector(hed)
+        hed = hedDetector(hed) * mask_all[:,:,0]
+        hed = hed*mask[:,:,0]
         hed = HWC3(hed)
         hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
         img_masked = Image.fromarray(hed)
