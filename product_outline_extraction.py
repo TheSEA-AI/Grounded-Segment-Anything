@@ -217,11 +217,12 @@ def product_outline_extraction(intput_dir, output_dir, img_format = '.png', prod
 
     hedDetector = HEDdetector()
     kernel = np.ones((3, 3), np.uint8)
+    image_dim = 1024
     for img_path, img_name in zip(images_path, image_filename_list):
         #mask = product_mask_extraction(img_path, product_type)
         #####################################
         #extract mask
-        image_source, image = load_image(img_path)
+        image_source, image = load_image(img_path, image_dim)
         _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model)
         mask_all = np.full((image_source.shape[1],image_source.shape[1]), True, dtype=bool)
 
