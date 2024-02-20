@@ -243,6 +243,7 @@ def product_outline_extraction(intput_dir, output_dir, img_format = '.png', prod
         mask = np.array(mask, dtype=bool)
 
         img = Image.open(img_path).convert("RGB")
+        img = img.resize((image_dim, image_dim), Image.LANCZOS)
         image_array = np.asarray(img)
 
         hed = HWC3(image_array)
