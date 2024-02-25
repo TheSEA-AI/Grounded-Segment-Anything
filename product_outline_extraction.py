@@ -261,12 +261,13 @@ def product_outline_extraction(intput_dir, output_dir, img_format = '.png', prod
         img_save_path = output_dir + '/' + img_name
         img_masked.save(img_save_path, img_format)
 
-def filter_hed(product_image, input_dir, output_dir):
-    image_filename_list = [i for i in os.listdir(input_dir)]
-    images_path = [os.path.join(input_dir, file_path)
+def filter_hed(product_image, image_dir):
+    image_filename_list = [i for i in os.listdir(image_dir)]
+    images_path = [os.path.join(image_dir, file_path)
                         for file_path in image_filename_list]                
     
-    img1 = cv2.imread(os.path.join(input_dir, product_image), cv2.IMREAD_GRAYSCALE)
+    print(f'image dir = {image_dir}')
+    img1 = cv2.imread(os.path.join(image_dir, product_image), cv2.IMREAD_GRAYSCALE)
     ret1, thresh1 = cv2.threshold(img1, 127, 255,0)
     contours1,hierarchy1 = cv2.findContours(thresh1,2,1)
     cnt1 = contours1[0]
@@ -284,7 +285,7 @@ if __name__ == "__main__":
     args = parse_args()
     product_outline_extraction(args.input_dir, args.output_dir, args.img_format)
     if args.product_image is not None:
-       filter_hed(args.product_image,args.input_dir, args.output_dir)
+       filter_hed(args.product_image, args.output_dir)
     print(f'process finished.')
     #row_position, col_position = row_col_position(args.img_path, args.product_type)
     #print(f'row_position={row_position},col_position={col_position}')
