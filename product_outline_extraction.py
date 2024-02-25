@@ -264,18 +264,18 @@ def product_outline_extraction(intput_dir, output_dir, img_format = '.png', prod
 def filter_hed(product_image, input_dir, output_dir):
     image_filename_list = [i for i in os.listdir(input_dir)]
     images_path = [os.path.join(input_dir, file_path)
-                        for file_path in image_filename_list]
+                        for file_path in image_filename_list]                
     
     img1 = cv2.imread(os.path.join(input_dir, product_image), cv2.IMREAD_GRAYSCALE)
-    _, thresh1 = cv2.threshold(img1, 127, 255,0)
-    _,contours1 = cv2.findContours(thresh1,2,1)
+    ret1, thresh1 = cv2.threshold(img1, 127, 255,0)
+    contours1,hierarchy1 = cv2.findContours(thresh1,2,1)
     cnt1 = contours1[0]
 
     for img_name, img_path in zip(image_filename_list, images_path):
         if img_name != product_image:
             img2 = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-            _, thresh2 = cv2.threshold(img2, 127, 255,0)
-            _,contours2 = cv2.findContours(thresh2,2,1)
+            ret2, thresh2 = cv2.threshold(img2, 127, 255,0)
+            contours2,hierarchy2 = cv2.findContours(thresh2,2,1)
             cnt2 = contours2[0]
             ret = cv2.matchShapes(cnt1,cnt2,1,0.0)
             print(f'img={img_name}, similarity={ret}')
