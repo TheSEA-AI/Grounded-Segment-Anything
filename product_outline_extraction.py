@@ -76,6 +76,12 @@ def parse_args(input_args=None):
                         type=str, 
                         required=False,
                         help="The background image with the product")
+    
+    parser.add_argument("--similarity_threshold", 
+                        default=None, 
+                        type=int, 
+                        required=False,
+                        help="The threshold to remove hed images")
 
     if input_args is not None:
         args = parser.parse_args(input_args)
@@ -261,7 +267,7 @@ def product_outline_extraction(intput_dir, output_dir, img_format = '.png', prod
         img_save_path = output_dir + '/' + img_name
         img_masked.save(img_save_path, img_format)
 
-def filter_hed(product_images, image_dir):
+def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
     image_filename_list = [i for i in os.listdir(image_dir)]
     images_path = [os.path.join(image_dir, file_path)
                         for file_path in image_filename_list]                
@@ -290,14 +296,14 @@ def filter_hed(product_images, image_dir):
     
     for k, v in  img_similarity_dic.items():
         print(f'img={k}, similarity={v}')
-        if v >= 3.0:
+        if v >= similarity_threshold:
             os.remove(os.path.join(image_dir, k))
 
 if __name__ == "__main__":
     args = parse_args()
     product_outline_extraction(args.input_dir, args.output_dir, args.img_format)
     if args.product_images is not None:
-       filter_hed(args.product_images, args.output_dir)
+       filter_hed(args.product_images, args.output_dir, args.similarity_threshold)
     print(f'process finished.')
     #row_position, col_position = row_col_position(args.img_path, args.product_type)
     #print(f'row_position={row_position},col_position={col_position}')
