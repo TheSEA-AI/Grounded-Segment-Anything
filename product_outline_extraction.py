@@ -71,9 +71,9 @@ def parse_args(input_args=None):
                         required=False,
                         help="The type of the product.")
     
-    parser.add_argument("--product_images", 
+    parser.add_argument("--product_images", '--list',
+                        action='append',
                         default=None, 
-                        type=list, 
                         required=False,
                         help="The background image with the product")
     
@@ -273,10 +273,10 @@ def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
                         for file_path in image_filename_list]                
     
     print(f'image dir = {image_dir}')
+    print(f'product_images={product_images}')
     img_similarity_dic = {}
     for product_image in product_images:
         img1 = cv2.imread(os.path.join(image_dir, product_image), cv2.IMREAD_GRAYSCALE)
-        print(f'product_image={product_image}')
         ret1, thresh1 = cv2.threshold(img1, 127, 255,0)
         contours1,hierarchy1 = cv2.findContours(thresh1,2,1)
         cnt1 = contours1[0]
