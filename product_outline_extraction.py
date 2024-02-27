@@ -293,7 +293,7 @@ def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
                     if img_similarity_dic[img_name] > ret:
                         img_similarity_dic[img_name] = ret
                 print(f'product_image={product_image}, img={img_name}, similarity={ret}')
-    
+
     for k, v in  img_similarity_dic.items():
         print(f'img={k}, similarity={v}')
         if v >= similarity_threshold:
