@@ -291,7 +291,7 @@ def filter_hed(product_images, image_dir):
     for k, v in  img_similarity_dic.items():
         print(f'img={k}, similarity={v}')
         if v >= 3.0:
-            os.remove(k)
+            os.remove(os.path.join(image_dir, k))
 
 if __name__ == "__main__":
     args = parse_args()
