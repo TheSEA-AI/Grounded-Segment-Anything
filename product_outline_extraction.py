@@ -73,7 +73,7 @@ def parse_args(input_args=None):
     
     parser.add_argument("--product_images", 
                         default=None, 
-                        type=str, 
+                        type=list, 
                         required=False,
                         help="The background image with the product")
     
