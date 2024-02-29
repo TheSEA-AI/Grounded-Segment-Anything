@@ -274,8 +274,10 @@ def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
     
     print(f'image dir = {image_dir}')
     print(f'product_images={product_images}')
+    product_images = product_images.split(',')
     img_similarity_dic = {}
     for product_image in product_images:
+        product_image = product_image[1:-1]
         img1 = cv2.imread(os.path.join(image_dir, product_image), cv2.IMREAD_GRAYSCALE)
         ret1, thresh1 = cv2.threshold(img1, 127, 255,0)
         contours1,hierarchy1 = cv2.findContours(thresh1,2,1)
@@ -304,7 +306,7 @@ if __name__ == "__main__":
     args = parse_args()
     product_outline_extraction(args.input_dir, args.output_dir, args.img_format)
     if args.product_images is not None:
-       filter_hed(args.product_images, args.output_dir, args.similarity_threshold)
+       filter_hed(args.product_images[0], args.output_dir, args.similarity_threshold)
     print(f'process finished.')
     #row_position, col_position = row_col_position(args.img_path, args.product_type)
     #print(f'row_position={row_position},col_position={col_position}')
