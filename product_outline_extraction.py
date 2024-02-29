@@ -71,9 +71,9 @@ def parse_args(input_args=None):
                         required=False,
                         help="The type of the product.")
     
-    parser.add_argument("--product_images", 
-                        action='append',
-                        default=None, 
+    parser.add_argument("--product_images",
+                        nargs='+', 
+                        default=[],
                         required=False,
                         help="The background image with the product")
     
@@ -304,7 +304,7 @@ if __name__ == "__main__":
     args = parse_args()
     product_outline_extraction(args.input_dir, args.output_dir, args.img_format)
     if args.product_images is not None:
-       filter_hed(args.product_images[0], args.output_dir, args.similarity_threshold)
+       filter_hed(args.product_images, args.output_dir, args.similarity_threshold)
     print(f'process finished.')
     #row_position, col_position = row_col_position(args.img_path, args.product_type)
     #print(f'row_position={row_position},col_position={col_position}')
