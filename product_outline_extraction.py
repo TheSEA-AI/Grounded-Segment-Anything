@@ -277,7 +277,9 @@ def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
     product_images = product_images.split(',')
     img_similarity_dic = {}
     for product_image in product_images:
+        print(f'before product_image={product_image}')
         product_image = product_image[1:-1]
+        print(f'after product_image={product_image}')
         img1 = cv2.imread(os.path.join(image_dir, product_image), cv2.IMREAD_GRAYSCALE)
         ret1, thresh1 = cv2.threshold(img1, 127, 255,0)
         contours1,hierarchy1 = cv2.findContours(thresh1,2,1)
