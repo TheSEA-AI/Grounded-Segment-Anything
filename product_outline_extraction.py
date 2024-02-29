@@ -272,16 +272,16 @@ def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
     images_path = [os.path.join(image_dir, file_path)
                         for file_path in image_filename_list]                
     
-    print(f'image dir = {image_dir}')
-    print(f'product_images={product_images}')
+    #print(f'image dir = {image_dir}')
+    #print(f'product_images={product_images}')
     product_images = product_images[1:-1]
     product_images = product_images.split(',')
     img_similarity_dic = {}
     for product_image in product_images:
         product_image = product_image.strip()
-        print(f'before product_image={product_image}')
+        #print(f'before product_image={product_image}')
         product_image = product_image[1:-1]
-        print(f'after product_image={product_image}')
+        #print(f'after product_image={product_image}')
         img1 = cv2.imread(os.path.join(image_dir, product_image), cv2.IMREAD_GRAYSCALE)
         ret1, thresh1 = cv2.threshold(img1, 127, 255,0)
         contours1,hierarchy1 = cv2.findContours(thresh1,2,1)
@@ -302,7 +302,7 @@ def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
                 print(f'product_image={product_image}, img={img_name}, similarity={ret}')
 
     for k, v in  img_similarity_dic.items():
-        print(f'img={k}, similarity={v}')
+        #print(f'img={k}, similarity={v}')
         if v >= similarity_threshold:
             os.remove(os.path.join(image_dir, k))
 
