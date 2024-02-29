@@ -274,6 +274,7 @@ def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
     
     print(f'image dir = {image_dir}')
     print(f'product_images={product_images}')
+    product_images = product_images[1:-1]
     product_images = product_images.split(',')
     img_similarity_dic = {}
     for product_image in product_images:
