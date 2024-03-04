@@ -309,7 +309,7 @@ def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
 if __name__ == "__main__":
     args = parse_args()
     product_outline_extraction(args.input_dir, args.output_dir, args.img_format)
-    if args.product_images is not None:
+    if len(args.product_images) > 0:
        filter_hed(args.product_images[0], args.output_dir, args.similarity_threshold)
     print(f'process finished.')
     #row_position, col_position = row_col_position(args.img_path, args.product_type)
