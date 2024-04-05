@@ -322,8 +322,8 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = '.pn
         image_array = np.asarray(img)
 
         white_array = np.ones_like(image_array) * 255
-        white_array = white_array * mask_all[:,:,0]
-        white_array = white_array * mask[:,:,0]
+        white_array = white_array * mask_all
+        white_array = white_array * mask
 
         hed = HWC3(image_array)
         hed = hedDetector(hed) * mask_all[:,:,0]
