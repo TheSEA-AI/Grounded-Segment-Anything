@@ -308,7 +308,7 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = '.pn
         img = img.resize((image_dim, image_dim), Image.LANCZOS)
         image_array = np.asarray(img)
 
-        white_array = np.ones_like(image_array) * 200
+        white_array = np.ones_like(image_array) * 180
         white_array = white_array * mask_all
         white_array = white_array * mask
        
