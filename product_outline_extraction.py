@@ -329,7 +329,7 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = '.pn
         hed = hedDetector(hed) * mask_all[:,:,0]
         hed = hed*mask[:,:,0]
         hed = HWC3(hed)
-        hed = hed + white_array
+        hed = np.where(hed<100, white_array, hed)
         hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
         img_masked = Image.fromarray(hed)
         img_save_path = output_dir + '/' + img_name
