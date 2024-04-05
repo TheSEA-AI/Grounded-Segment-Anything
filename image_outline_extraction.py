@@ -255,10 +255,75 @@ def product_outline_extraction(intput_dir, output_dir, img_format = '.png', prod
         img_save_path = output_dir + '/' + img_name
         img_masked.save(img_save_path, img_format)
 
+def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = '.png', product_type = "cosmetic product", image_resolution = 1024):
+
+    Path(output_dir).mkdir(parents=True, exist_ok=True) 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    ckpt_repo_id = "ShilongLiu/GroundingDINO"
+    ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
+    ckpt_config_filename = "GroundingDINO_SwinB.cfg.py"
+
+    groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename, device)
+
+    sam_checkpoint_file = Path("./sam_hq_vit_h.pth")
+    if not sam_checkpoint_file.is_file():
+        sam_hq_vit_url = "https://huggingface.co/lkeab/hq-sam/resolve/main/sam_hq_vit_h.pth"
+        wget.download(sam_hq_vit_url)
+
+    sam_checkpoint = "sam_hq_vit_h.pth"
+    sam_predictor = SamPredictor(build_sam_hq_vit_h(checkpoint=sam_checkpoint).to(device))
+
+    image_filename_list = [i for i in os.listdir(intput_dir)]
+    images_path = [os.path.join(intput_dir, file_path)
+                        for file_path in image_filename_list]
+
+    hedDetector = HEDdetector()
+    kernel = np.ones((3, 3), np.uint8)
+    image_dim = 1024
+    for img_path, img_name in zip(images_path, image_filename_list):
+        #mask = product_mask_extraction(img_path, product_type)
+        #####################################
+        #extract mask
+        image_source, image = load_image(img_path, image_dim)
+        _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model)
+        mask_all = np.full((image_source.shape[1],image_source.shape[1]), True, dtype=bool)
+
+        if detected_boxes.size(0) != 0:
+            segmented_frame_masks = segment(image_source, sam_predictor, boxes=detected_boxes, device=device)
+
+            for mask in segmented_frame_masks:
+                mask_all = mask_all & ~mask[0].cpu().numpy()
+        else:
+            raise ValueError("the product cannot be extracted.")
+
+        mask_all = np.stack((mask_all,)*3, axis=-1)
+        ################
+        mask = ~mask_all
+        mask = mask.astype(np.uint8)     
+        mask = cv2.dilate(mask, kernel, iterations=3) 
+        mask = np.array(mask, dtype=bool)
+
+        img = Image.open(img_path).convert("RGB")
+        img = img.resize((image_dim, image_dim), Image.LANCZOS)
+        image_array = np.asarray(img)
+
+        white_array = np.ones_like(image_array)
+        white_array = white_array * mask_all[:,:,0]
+        white_array = white_array * mask[:,:,0]
+       
+        hed = HWC3(image_array)
+        hed = hedDetector(hed) * mask_all[:,:,0]
+        hed = HWC3(hed)
+        hed = hed + white_array
+        hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
+        img_masked = Image.fromarray(hed)
+        img_save_path = output_dir + '/' + img_name
+        img_masked.save(img_save_path, img_format)
 
 if __name__ == "__main__":
     args = parse_args()
-    product_outline_extraction(args.input_dir, args.output_dir, args.img_format)
+    product_outline_extraction_by_mask(args.input_dir, args.output_dir, args.img_format)
     print(f'process finished.')
     #row_position, col_position = row_col_position(args.img_path, args.product_type)
     #print(f'row_position={row_position},col_position={col_position}')
