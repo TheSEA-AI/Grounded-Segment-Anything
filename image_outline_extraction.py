@@ -406,7 +406,7 @@ def product_outline_extraction_by_individual_masks(intput_dir, output_dir, img_f
 
 if __name__ == "__main__":
     args = parse_args()
-    product_outline_extraction_by_mask(args.input_dir, args.output_dir, args.img_format)
+    product_outline_extraction_by_individual_masks(args.input_dir, args.output_dir, args.img_format)
     print(f'process finished.')
     #row_position, col_position = row_col_position(args.img_path, args.product_type)
     #print(f'row_position={row_position},col_position={col_position}')
