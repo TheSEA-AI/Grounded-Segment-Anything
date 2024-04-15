@@ -321,7 +321,7 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = '.pn
         img_save_path = output_dir + '/' + img_name
         img_masked.save(img_save_path, img_format)
 
-def product_outline_extraction_by_individual_masks(intput_dir, output_dir, img_format = '.png', product_type = "cosmetic product", image_resolution = 1024):
+def product_outline_extraction_by_individual_masks(intput_dir, output_dir, img_format = '.png', product_type = "beauty product", image_resolution = 1024):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True) 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
