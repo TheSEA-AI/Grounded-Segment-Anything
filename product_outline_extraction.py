@@ -365,35 +365,23 @@ def product_outline_extraction_by_individual_masks(intput_dir, output_dir, img_f
         #extract mask
         image_source, image = load_image(img_path, image_dim)
         _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model)
-        mask_all = np.full((image_source.shape[1],image_source.shape[1]), True, dtype=bool)
         individual_masks = []
 
         if detected_boxes.size(0) != 0:
             segmented_frame_masks = segment(image_source, sam_predictor, boxes=detected_boxes, device=device)
 
             for mask in segmented_frame_masks:
-                mask_all = mask_all & ~mask[0].cpu().numpy()
                 individual_masks.append(np.stack((mask[0].cpu().numpy(),)*3, axis=-1))
         else:
             raise ValueError("the product cannot be extracted.")
 
-        mask_all = np.stack((mask_all,)*3, axis=-1)
         ################
-    
-        mask = ~mask_all
-        mask = mask.astype(np.uint8)     
-        mask = cv2.dilate(mask, kernel, iterations=3) 
-        mask = np.array(mask, dtype=bool)
-
         img = Image.open(img_path).convert("RGB")
         img = img.resize((image_dim, image_dim), Image.LANCZOS)
         image_array = np.asarray(img)
 
-        white_array = np.ones_like(image_array) * 180
-        white_array = white_array * mask_all
-        white_array = white_array * mask
-
         individual_white_arrays = []
+        heds = []
         for indi_mask in individual_masks:
             indi_mask_inverse = ~indi_mask
             indi_mask_inverse = indi_mask_inverse.astype(np.uint8)     
@@ -406,12 +394,17 @@ def product_outline_extraction_by_individual_masks(intput_dir, output_dir, img_f
             individual_white_array = individual_white_array * indi_mask_inverse
 
             individual_white_arrays.append(individual_white_array)
+        
+            hed = HWC3(image_array)
+            hed = hedDetector(hed) * ~indi_mask[:,:,0]
+            hed = hed*indi_mask_inverse[:,:,0]
+            hed = HWC3(hed)
+            heds.append(hed)
 
-        hed = HWC3(image_array)
-        hed = hedDetector(hed) * mask_all[:,:,0]
-        hed = hed*mask[:,:,0]
-        hed = HWC3(hed)
-        hed = np.where(hed<100, white_array, hed)
+        hed = heds[0]
+        for h in heds:
+            hed = np.where(hed<100, h, hed)
+            
         for individual_white_array in individual_white_arrays:
             hed = np.where(hed<100, individual_white_array, hed)
         hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
