@@ -159,7 +159,7 @@ def get_product_position(mask):
 #   row positon: the row where the very top pixel of the product is located
 #   col positon: the column where the very left pixel of the product is located
 ###
-def product_mask_extraction(img_path, product_type = "cosmetic product"):
+def product_mask_extraction(img_path, product_type = "beauty product"):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     ckpt_repo_id = "ShilongLiu/GroundingDINO"
@@ -192,7 +192,7 @@ def product_mask_extraction(img_path, product_type = "cosmetic product"):
 
     return mask_all
 
-def product_outline_extraction(intput_dir, output_dir, img_format = '.png', product_type = "cosmetic product", image_resolution = 1024):
+def product_outline_extraction(intput_dir, output_dir, img_format = '.png', product_type = "beauty product", image_resolution = 1024):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True) 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -255,7 +255,7 @@ def product_outline_extraction(intput_dir, output_dir, img_format = '.png', prod
         img_save_path = output_dir + '/' + img_name
         img_masked.save(img_save_path, img_format)
 
-def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = '.png', product_type = "cosmetic product", image_resolution = 1024):
+def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = '.png', product_type = "beauty product", image_resolution = 1024):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True) 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -399,7 +399,7 @@ def product_outline_extraction_by_individual_masks(intput_dir, output_dir, img_f
 
 if __name__ == "__main__":
     args = parse_args()
-    product_outline_extraction_by_individual_masks(args.input_dir, args.output_dir, args.img_format)
+    product_outline_extraction_by_mask(args.input_dir, args.output_dir, args.img_format)
     print(f'process finished.')
     #row_position, col_position = row_col_position(args.img_path, args.product_type)
     #print(f'row_position={row_position},col_position={col_position}')

@@ -171,7 +171,7 @@ def get_product_position(mask):
 #   row positon: the row where the very top pixel of the product is located
 #   col positon: the column where the very left pixel of the product is located
 ###
-def product_mask_extraction(img_path, product_type = "cosmetic product"):
+def product_mask_extraction(img_path, product_type = "beauty product"):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     ckpt_repo_id = "ShilongLiu/GroundingDINO"
@@ -204,7 +204,7 @@ def product_mask_extraction(img_path, product_type = "cosmetic product"):
 
     return mask_all
 
-def product_outline_extraction(intput_dir, output_dir, img_format = '.png', product_type = "cosmetic product", image_resolution = 1024):
+def product_outline_extraction(intput_dir, output_dir, img_format = '.png', product_type = "beauty product", image_resolution = 1024):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True) 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -267,7 +267,7 @@ def product_outline_extraction(intput_dir, output_dir, img_format = '.png', prod
         img_save_path = output_dir + '/' + img_name
         img_masked.save(img_save_path, img_format)
 
-def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = '.png', product_type = "cosmetic product", image_resolution = 1024):
+def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = '.png', product_type = "beauty product", image_resolution = 1024):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True) 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -454,7 +454,7 @@ def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
 
 if __name__ == "__main__":
     args = parse_args()
-    product_outline_extraction_by_individual_masks(args.input_dir, args.output_dir, args.img_format)
+    product_outline_extraction_by_mask(args.input_dir, args.output_dir, args.img_format)
     if len(args.product_images) > 0:
        filter_hed(args.product_images[0], args.output_dir, args.similarity_threshold)
     print(f'process finished.')
