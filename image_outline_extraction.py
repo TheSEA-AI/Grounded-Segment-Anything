@@ -388,7 +388,7 @@ def product_outline_extraction_by_individual_masks(intput_dir, output_dir, img_f
 
         hed = heds[0]
         for h in heds:
-            hed = np.where(hed<100, h, hed)
+            hed = np.where(hed>100, h, hed)
 
         for individual_white_array in individual_white_arrays:
             hed = np.where(hed<100, individual_white_array, hed)

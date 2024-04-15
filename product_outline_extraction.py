@@ -372,7 +372,7 @@ def product_outline_extraction_by_individual_masks(intput_dir, output_dir, img_f
 
             for mask in segmented_frame_masks:
                 individual_masks.append(np.stack((mask[0].cpu().numpy(),)*3, axis=-1))
-                print(f'mask={mask[0].cpu().numpy()}')
+                #print(f'mask={mask[0].cpu().numpy()}')
         else:
             raise ValueError("the product cannot be extracted.")
 
@@ -404,7 +404,7 @@ def product_outline_extraction_by_individual_masks(intput_dir, output_dir, img_f
 
         hed = heds[0]
         for h in heds:
-            hed = np.where(hed<100, h, hed)
+            hed = np.where(hed>100, h, hed)
 
         for individual_white_array in individual_white_arrays:
             hed = np.where(hed<100, individual_white_array, hed)
