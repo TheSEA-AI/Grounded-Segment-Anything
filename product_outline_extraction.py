@@ -304,6 +304,13 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = '.pn
             segmented_frame_masks = segment(image_source, sam_predictor, boxes=detected_boxes, device=device)
 
             for mask in segmented_frame_masks:
+                im = mask[0].cpu().numpy().astype(np.uint8)*255
+                imgray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+                _, thresh = cv2.threshold(imgray, 127, 255, 0)
+                contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                if len(contours) >= 3:
+                    continue
+                
                 mask_all = mask_all & ~mask[0].cpu().numpy()
         else:
             raise ValueError("the product cannot be extracted.")
