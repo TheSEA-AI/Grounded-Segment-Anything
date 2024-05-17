@@ -79,7 +79,7 @@ def parse_args(input_args=None):
     
     parser.add_argument("--similarity_threshold", 
                         default=2.5, 
-                        type=int, 
+                        type=float, 
                         required=False,
                         help="The threshold to remove hed images")
 
