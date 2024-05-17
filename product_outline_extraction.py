@@ -456,7 +456,7 @@ def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
                 #print(f'product_image={product_image}, img={img_name}, similarity={ret}')
 
     for k, v in  img_similarity_dic.items():
-        #print(f'img={k}, similarity={v}')
+        print(f'img={k}, similarity={v}')
         if v >= similarity_threshold:
             os.remove(os.path.join(image_dir, k))
 
