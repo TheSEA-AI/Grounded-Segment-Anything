@@ -437,8 +437,8 @@ def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
         product_image = product_image[1:-1]
         #print(f'after product_image={product_image}')
         img1 = cv2.imread(os.path.join(image_dir, product_image), cv2.IMREAD_GRAYSCALE)
-        img1[img1 > 100] = 160
-        img1[img1 <= 100] = 0
+        img1[img1 > 80] = 160
+        img1[img1 <= 80] = 0
         ret1, thresh1 = cv2.threshold(img1, 127, 255,0)
         contours1,hierarchy1 = cv2.findContours(thresh1,2,1)
         cnt1 = contours1[0]
@@ -446,8 +446,8 @@ def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
         for img_name, img_path in zip(image_filename_list, images_path):
             if img_name not in product_images:
                 img2 = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-                img2[img2 > 100] = 160
-                img2[img2 <= 100] = 0
+                img2[img2 > 80] = 160
+                img2[img2 <= 80] = 0
                 ret2, thresh2 = cv2.threshold(img2, 127, 255,0)
                 contours2,hierarchy2 = cv2.findContours(thresh2,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                 print(f'contours2 len={len(contours2)}')
