@@ -426,6 +426,17 @@ def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
     images_path = [os.path.join(image_dir, file_path)
                         for file_path in image_filename_list]                
     
+    image_dirs = image_dir.split('/')
+    new_image_dir = ''
+    for i in range(len(image_dirs)-1):
+        new_image_dir += '/' + image_dirs[i]
+    new_image_dir +=  '/' + 'data_hed_background_original'
+
+    for img_name, img_path in zip(image_filename_list, images_path):
+        img = Image.open(img_path).convert("RGB")
+        img.save(new_image_dir+'/'+img_name, 'png')
+        
+
     #print(f'image dir = {image_dir}')
     #print(f'product_images={product_images}')
     product_images = product_images[1:-1]
