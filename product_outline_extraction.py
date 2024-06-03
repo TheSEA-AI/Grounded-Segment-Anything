@@ -422,6 +422,9 @@ def product_outline_extraction_by_individual_masks(intput_dir, output_dir, img_f
         img_masked.save(img_save_path, img_format)
 
 def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
+
+    large_value = 100
+
     image_filename_list = [i for i in os.listdir(image_dir)]
     images_path = [os.path.join(image_dir, file_path)
                         for file_path in image_filename_list]                
@@ -465,14 +468,18 @@ def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
                 ret2, thresh2 = cv2.threshold(img2, 127, 255,0)
                 contours2,hierarchy2 = cv2.findContours(thresh2,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                 print(f'contours2 len={len(contours2)}')
-                cnt2 = contours2[0]
-                ret = cv2.matchShapes(cnt1,cnt2,1,0.0)
-                if img_name not in img_similarity_dic:
-                    img_similarity_dic[img_name] = ret
-                else:
-                    if img_similarity_dic[img_name] > ret:
+                if len(contours2) <=2:
+                    cnt2 = contours2[0]
+                    ret = cv2.matchShapes(cnt1,cnt2,1,0.0)
+                    if img_name not in img_similarity_dic:
                         img_similarity_dic[img_name] = ret
-                #print(f'product_image={product_image}, img={img_name}, similarity={ret}')
+                    else:
+                        if img_similarity_dic[img_name] > ret:
+                            img_similarity_dic[img_name] = ret
+                    #print(f'product_image={product_image}, img={img_name}, similarity={ret}')
+                else:
+                    img_similarity_dic[img_name] = large_value
+                    
 
     for k, v in  img_similarity_dic.items():
         print(f'img={k}, similarity={v}')
