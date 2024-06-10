@@ -468,7 +468,7 @@ def filter_hed(product_images, image_dir, similarity_threshold = 3.0):
                 img2[img2 <= 80] = 0
                 ret2, thresh2 = cv2.threshold(img2, 127, 255,0)
                 contours2,hierarchy2 = cv2.findContours(thresh2,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-                print(f'contours2 len={len(contours2)}')
+                print(f'img_name={img_name}, contours2 len={len(contours2)}')
                 if len(contours2) <=2:
                     cnt2 = contours2[0]
                     ret = cv2.matchShapes(cnt1,cnt2,1,0.0)
