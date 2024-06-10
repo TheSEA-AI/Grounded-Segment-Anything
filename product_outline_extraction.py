@@ -310,7 +310,7 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = '.pn
                 _, thresh = cv2.threshold(imgray, 127, 255, 0)
                 contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                 print(f'len(contours)={len(contours)}')
-                if len(contours) >= 10:
+                if len(contours) >= 20:
                     continue
 
                 mask_all = mask_all & ~mask[0].cpu().numpy()
