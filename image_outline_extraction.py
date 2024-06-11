@@ -287,10 +287,10 @@ def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output
         #extract mask
         image_source, image = load_image(img_path, image_dim)
         product_types = ["beauty product", "cosmetic product", "skincare product", "makeup product"]
+        mask_all = np.full((image_source.shape[1],image_source.shape[1]), True, dtype=bool)
         for product_type in product_types:
             _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model)
-            mask_all = np.full((image_source.shape[1],image_source.shape[1]), True, dtype=bool)
-
+            
             if detected_boxes.size(0) != 0:
                 segmented_frame_masks = segment(image_source, sam_predictor, boxes=detected_boxes, device=device)
 
