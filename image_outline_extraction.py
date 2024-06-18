@@ -230,7 +230,7 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png
 ##the holes are becasue of SAM noise
 def image_outline_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_format = 'png', image_resolution = 1024):
 
-    Path(output_dir).mkdir(parents=True, exist_ok=True) 
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     ckpt_repo_id = "ShilongLiu/GroundingDINO"
@@ -263,7 +263,7 @@ def image_outline_extraction_by_mask_multiple_product_types(intput_dir, output_d
         mask_all = np.full((image_source.shape[1],image_source.shape[1]), True, dtype=bool)
         for product_type in product_types:
             _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model)
-            
+
             if detected_boxes.size(0) != 0:
                 segmented_frame_masks = segment(image_source, sam_predictor, boxes=detected_boxes, device=device)
 
@@ -275,7 +275,7 @@ def image_outline_extraction_by_mask_multiple_product_types(intput_dir, output_d
                     contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                     if len(contours) >= 50:
                         continue
-                    
+
                     mask_all = mask_all & ~mask[0].cpu().numpy()
             else:
                 raise ValueError("the product cannot be extracted.")
@@ -294,7 +294,7 @@ def image_outline_extraction_by_mask_multiple_product_types(intput_dir, output_d
         mask_all = ndimage.binary_closing(mask_all,iterations=ite).astype(int)
         mask_all = mask_all.astype(bool)
         ##### fill small holes outside product #######
-        
+
         ##### flip surrounding pixels due to previous fill small holes outside product #######
         mask_all[0:ite+2, :] = True
         mask_all[:, 0:ite+2] = True
@@ -304,10 +304,9 @@ def image_outline_extraction_by_mask_multiple_product_types(intput_dir, output_d
 
         mask_all = np.stack((mask_all,)*3, axis=-1)
         ################
-        
         mask = ~mask_all
-        mask = mask.astype(np.uint8)     
-        mask = cv2.dilate(mask, kernel, iterations=3) 
+        mask = mask.astype(np.uint8)
+        mask = cv2.dilate(mask, kernel, iterations=3)
         mask = np.array(mask, dtype=bool)
 
         img = Image.open(img_path).convert("RGB")
@@ -318,8 +317,6 @@ def image_outline_extraction_by_mask_multiple_product_types(intput_dir, output_d
         white_array = white_array * mask_all
         white_array = white_array * mask
 
-        zero_array = np.zeros_like(image_array)
-       
         hed = HWC3(image_array)
         hed = hedDetector(hed) * mask_all[:,:,0]
         hed = HWC3(hed)

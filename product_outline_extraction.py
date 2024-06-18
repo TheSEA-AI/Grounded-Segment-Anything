@@ -249,7 +249,7 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png
 ##the holes are becasue of SAM noise
 def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_format = 'png', image_resolution = 1024):
 
-    Path(output_dir).mkdir(parents=True, exist_ok=True) 
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     ckpt_repo_id = "ShilongLiu/GroundingDINO"
@@ -312,7 +312,7 @@ def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output
         mask_all = ndimage.binary_closing(mask_all,iterations=ite).astype(int)
         mask_all = mask_all.astype(bool)
         ##### fill small holes outside product #######
-        
+
         ##### flip surrounding pixels due to previous fill small holes outside product #######
         mask_all[0:ite+2, :] = True
         mask_all[:, 0:ite+2] = True
@@ -322,10 +322,10 @@ def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output
 
         mask_all = np.stack((mask_all,)*3, axis=-1)
         ################
-    
+
         mask = ~mask_all
-        mask = mask.astype(np.uint8)     
-        mask = cv2.dilate(mask, kernel, iterations=3) 
+        mask = mask.astype(np.uint8)
+        mask = cv2.dilate(mask, kernel, iterations=3)
         mask = np.array(mask, dtype=bool)
 
         img = Image.open(img_path).convert("RGB")
@@ -346,6 +346,7 @@ def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output
         img_save_path = output_dir + '/' + img_name
         img_masked.save(img_save_path, img_format)
 
+## function for data hed background filtering
 def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_threshold, product_images):
 
     large_value = 100
@@ -413,9 +414,12 @@ def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_thresho
                             v_product = v_product*10.0
                         if v_product >= similarity_threshold:
                             remove.append(True)
+                        else:
+                            remove.append(False)
                 
             if False not in remove:
                 os.remove(img_path)
+
 
 ## the filtering for data is not enabled
 ## this is mainly for calculating data similarities to be used in hed filtering
