@@ -361,8 +361,8 @@ def filter_hed(product_images, data_hed_background_dir, data_similarity_dict, si
         new_image_dir += image_dirs[i] + '/'
     new_image_dir += 'data_hed_background_original'
     Path(new_image_dir).mkdir(parents=True, exist_ok=True)
-    print(f'data_hed_background_dir={data_hed_background_dir}')
-    print(f'new_data_hed_background_dir={new_image_dir}')
+    #print(f'data_hed_background_dir={data_hed_background_dir}')
+    #print(f'new_data_hed_background_dir={new_image_dir}')
 
     for img_name, img_path in zip(image_filename_list, images_path):
         img = Image.open(img_path).convert("RGB")
@@ -472,6 +472,7 @@ def filter_data(product_images, hed_background_dir, hed_dir):
 if __name__ == "__main__":
     args = parse_args()
     product_outline_extraction_by_mask_multiple_product_types(args.input_dir, args.output_dir, args.img_format)
+    print(f'similarity={args.similarity_threshold}')
     if len(args.product_images) > 0:
        data_similarity_dict_all = filter_data(args.product_images, args.output_dir, args.data_hed_dir)
        filter_hed(args.product_images, args.output_dir, data_similarity_dict_all, args.similarity_threshold)
