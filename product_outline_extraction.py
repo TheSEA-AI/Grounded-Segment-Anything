@@ -79,7 +79,7 @@ def parse_args(input_args=None):
     #                    help="The background image with the product")
 
     parser.add_argument("--product_images",
-                    nargs='*', 
+                    nargs='+', 
                     default=None,
                     required=False,
                     help="The background image with the product")
@@ -346,7 +346,7 @@ def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output
         img_save_path = output_dir + '/' + img_name
         img_masked.save(img_save_path, img_format)
 
-def filter_hed(product_images, data_hed_background_dir, data_similarity_dict, similarity_threshold):
+def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_threshold, product_images):
 
     large_value = 100
 
@@ -419,7 +419,7 @@ def filter_hed(product_images, data_hed_background_dir, data_similarity_dict, si
 
 ## the filtering for data is not enabled
 ## this is mainly for calculating data similarities to be used in hed filtering
-def filter_data(product_images, hed_background_dir, hed_dir):
+def filter_data(hed_background_dir, hed_dir, product_images):
 
     print(f'product_images={product_images}')
     image_filename_list = [i for i in os.listdir(hed_dir)]
@@ -473,9 +473,10 @@ if __name__ == "__main__":
     args = parse_args()
     product_outline_extraction_by_mask_multiple_product_types(args.input_dir, args.output_dir, args.img_format)
     print(f'similarity={args.similarity_threshold}')
+    print(f'args.product_images={args.product_images}, len(args.product_images)={len(args.product_images)}')
     if len(args.product_images) > 0:
-       data_similarity_dict_all = filter_data(*args.product_images, args.output_dir, args.data_hed_dir)
-       filter_hed(*args.product_images, args.output_dir, data_similarity_dict_all, args.similarity_threshold)
+       data_similarity_dict_all = filter_data(args.output_dir, args.data_hed_dir, *args.product_images)
+       filter_hed(args.output_dir, data_similarity_dict_all, args.similarity_threshold, *args.product_images)
     print(f'process finished.')
     #row_position, col_position = row_col_position(args.img_path, args.product_type)
     #print(f'row_position={row_position},col_position={col_position}')
