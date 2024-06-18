@@ -474,8 +474,8 @@ if __name__ == "__main__":
     product_outline_extraction_by_mask_multiple_product_types(args.input_dir, args.output_dir, args.img_format)
     print(f'similarity={args.similarity_threshold}')
     if len(args.product_images) > 0:
-       data_similarity_dict_all = filter_data(args.product_images, args.output_dir, args.data_hed_dir)
-       filter_hed(args.product_images, args.output_dir, data_similarity_dict_all, args.similarity_threshold)
+       data_similarity_dict_all = filter_data(*args.product_images, args.output_dir, args.data_hed_dir)
+       filter_hed(*args.product_images, args.output_dir, data_similarity_dict_all, args.similarity_threshold)
     print(f'process finished.')
     #row_position, col_position = row_col_position(args.img_path, args.product_type)
     #print(f'row_position={row_position},col_position={col_position}')
