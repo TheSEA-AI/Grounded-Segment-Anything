@@ -22,13 +22,13 @@ def parse_args(input_args=None):
                         default=None, 
                         type=str, 
                         required=True, 
-                        help="Path to the image.")
+                        help="Path to the input image.")
 
     parser.add_argument("--output_dir", 
                         default=None, 
                         type=str, 
                         required=True, 
-                        help="Path to the image.")
+                        help="Path to output folder.")
     
     if input_args is not None:
         args = parser.parse_args(input_args)
