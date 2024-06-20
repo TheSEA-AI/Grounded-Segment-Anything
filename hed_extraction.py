@@ -9,7 +9,7 @@ from PIL import Image
 from PIL.ImageOps import exif_transpose
 import cv2
 from ControlNOLA.annotator.hed import HEDdetector
-from annotator.util import HWC3, resize_image
+from ControlNOLA.annotator.util import HWC3, resize_image
 import argparse
 import subprocess
 
