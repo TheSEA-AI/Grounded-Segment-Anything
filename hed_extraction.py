@@ -61,7 +61,7 @@ def main(input_dir, data_clean_dir, output_dir):
     for img_name, img_path in zip(image_filename_list, image_paths):
         file_size = os.path.getsize(img_path)
         #print(f'img_path={img_path}, file_size={file_size}')
-        
+        num += 1
         if file_size > 30*1024:
             img = Image.open(img_path).convert("RGB")
             img.save(data_clean_dir+'/'+img_name, 'png')
@@ -73,9 +73,9 @@ def main(input_dir, data_clean_dir, output_dir):
             hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
             img_hed = Image.fromarray(hed)
             img_hed.save(output_dir+'/'+img_name, 'png')
-            num += 1
-            if num % 100 == 0:
-                print(f'num={num}')
+            
+        if num % 100 == 0:
+            print(f'num={num}')
     
 
 if __name__ == "__main__":
