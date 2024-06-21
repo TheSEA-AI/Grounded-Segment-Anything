@@ -55,12 +55,6 @@ def parse_args(input_args=None):
                         required=True, 
                         help="Path to data instance.")
     
-    parser.add_argument("--data_hed_dir", 
-                        default=None, 
-                        type=str, 
-                        required=True, 
-                        help="Path to data hed.")
-
     parser.add_argument("--output_dir", 
                         default=None, 
                         type=str, 
