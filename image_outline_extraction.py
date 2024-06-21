@@ -226,6 +226,28 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png
         img_save_path = output_dir + '/' + img_name
         img_masked.save(img_save_path, img_format)
 
+def hed_extration(intput_dir, output_dir, img_format = 'png', image_resolution = 1024):
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    
+    image_filename_list = [i for i in os.listdir(intput_dir)]
+    images_path = [os.path.join(intput_dir, file_path)
+                        for file_path in image_filename_list]
+
+    hedDetector = HEDdetector()
+    image_dim = 1024
+    for img_path, img_name in zip(images_path, image_filename_list):
+        img = Image.open(img_path).convert("RGB")
+        img = img.resize((image_dim, image_dim), Image.LANCZOS)
+        image_array = np.asarray(img)
+
+        hed = HWC3(image_array)
+        hed = hedDetector(hed)
+        hed = HWC3(hed)
+        hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
+        img_masked = Image.fromarray(hed)
+        img_save_path = output_dir + '/' + img_name
+        img_masked.save(img_save_path, img_format)
+
 ##the latest version with multiple product types and filling holes etc.
 ##the holes are becasue of SAM noise
 def image_outline_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_format = 'png', image_resolution = 1024):
