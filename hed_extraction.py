@@ -13,7 +13,7 @@ from ControlNOLA.annotator.util import HWC3, resize_image
 import argparse
 import subprocess
 
-subprocess.call(["sed -i 's/from torchvision.transforms.functional_tensor import rgb_to_grayscale/from torchvision.transforms.functional import rgb_to_grayscale/' /usr/local/lib/python3.10/dist-packages/basicsr/data/degradations.py"], shell=True)
+#subprocess.call(["sed -i 's/from torchvision.transforms.functional_tensor import rgb_to_grayscale/from torchvision.transforms.functional import rgb_to_grayscale/' /usr/local/lib/python3.10/dist-packages/basicsr/data/degradations.py"], shell=True)
 
 def parse_args(input_args=None):
     parser = argparse.ArgumentParser(description="Simple example of product position extraction based on Grouned SAM.")
