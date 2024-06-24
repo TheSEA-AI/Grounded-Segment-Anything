@@ -72,7 +72,7 @@ def main(input_dir, data_clean_dir, output_dir, start_index, end_index):
     num = 0
     #for img_name, img_path in zip(image_filename_list, image_paths):
     for index in range(start_index, end_index+1):
-        img_name = str(index)
+        img_name = 'f' + str(index)
         img_path = os.path.join(input_dir, img_name)
         file_size = os.path.getsize(img_path)
         print(f'img_path={img_path}, file_size={file_size}')
