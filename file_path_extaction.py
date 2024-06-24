@@ -39,10 +39,9 @@ def main(input_dir, output_dir):
     #num_images = len(image_paths)
 
     files = os.scandir(input_dir)
-    num_images = len(files)
-    print(f'num_images={num_images}')
 
     info_file = output_dir + '/image_name_path.txt'
+    num = 0
     with open(info_file, 'w') as f:
         #for img_name, img_path in zip(image_filename_list, image_paths):
         #file_size = os.path.getsize(img_path)
@@ -52,7 +51,10 @@ def main(input_dir, output_dir):
         for file in files:
             file_size = os.path.getsize(file.path)
             if file_size > 30*1024:
+                num += 1
                 f.write(f"{file.name}, {file.path}\n")
+                if num % 100 == 0:
+                    print(f'num={num}')
 
     print('process finshed.')
 
