@@ -3,15 +3,11 @@ import random
 from io import BytesIO
 from pathlib import Path
 import numpy as np
-import torch
-import torch.nn.functional as F
 from PIL import Image
 from PIL.ImageOps import exif_transpose
 import cv2
-from ControlNOLA.annotator.hed import HEDdetector
-from ControlNOLA.annotator.util import HWC3, resize_image
 import argparse
-import subprocess
+
 
 def parse_args(input_args=None):
     parser = argparse.ArgumentParser(description="Simple example of product position extraction based on Grouned SAM.")
