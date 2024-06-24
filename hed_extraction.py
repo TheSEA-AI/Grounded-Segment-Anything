@@ -35,6 +35,18 @@ def parse_args(input_args=None):
                         type=str, 
                         required=True, 
                         help="Path to output folder.")
+
+    parser.add_argument("--start_index", 
+                        default=None, 
+                        type=int, 
+                        required=True, 
+                        help="image index to start with")
+    
+    parser.add_argument("--end_index", 
+                        default=None, 
+                        type=int, 
+                        required=True, 
+                        help="ending image index.")
     
     if input_args is not None:
         args = parser.parse_args(input_args)
@@ -44,13 +56,13 @@ def parse_args(input_args=None):
     return args
 
 
-def main(input_dir, data_clean_dir, output_dir):
-    image_filename_list = [i for i in os.listdir(input_dir) if i.endswith('.png')]
-    image_paths = [os.path.join(input_dir, file_path)
-                    for file_path in image_filename_list]
+def main(input_dir, data_clean_dir, output_dir, start_index, end_index):
+    #image_filename_list = [i for i in os.listdir(input_dir) if i.endswith('.png')]
+    #image_paths = [os.path.join(input_dir, file_path)
+    #                for file_path in image_filename_list]
 
-    num_images = len(image_paths)
-    print(f'num_images={num_images}')
+    #num_images = len(image_paths)
+    #print(f'num_images={num_images}')
 
     Path(output_dir).mkdir(parents=True, exist_ok=True) 
 
@@ -58,9 +70,12 @@ def main(input_dir, data_clean_dir, output_dir):
     hedDetector = HEDdetector()
 
     num = 0
-    for img_name, img_path in zip(image_filename_list, image_paths):
+    #for img_name, img_path in zip(image_filename_list, image_paths):
+    for index in range(start_index, end_index+1):
+        img_name = str(index)
+        img_path = os.path.join(input_dir, img_name)
         file_size = os.path.getsize(img_path)
-        #print(f'img_path={img_path}, file_size={file_size}')
+        print(f'img_path={img_path}, file_size={file_size}')
         num += 1
         if file_size > 30*1024:
             img = Image.open(img_path).convert("RGB")
@@ -80,4 +95,4 @@ def main(input_dir, data_clean_dir, output_dir):
 
 if __name__ == "__main__":
     args = parse_args()
-    main(args.input_dir, args.data_clean_dir, args.output_dir)
+    main(args.input_dir, args.data_clean_dir, args.output_dir, args.start_index, args.end_index)
