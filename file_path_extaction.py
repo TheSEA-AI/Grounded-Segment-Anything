@@ -47,10 +47,11 @@ def main(input_dir, output_dir):
         #file_size = os.path.getsize(img_path)
         #if file_size > 30*1024:
         #    f.write(f"{img_name}, {img_path}\n")
-        print(f'start1')
+        #print(f'start1')
         for file in files:
+            #print(f'start2')
             file_size = os.path.getsize(file.path)
-            print(f'file.path={file.path}')
+            #print(f'file.path={file.path}')
             if file_size > 30*1024:
                 num += 1
                 f.write(f"{file.name}, {file.path}\n")
