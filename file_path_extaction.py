@@ -33,19 +33,26 @@ def parse_args(input_args=None):
 
 
 def main(input_dir, output_dir):
-    image_filename_list = [i for i in os.listdir(input_dir) if i.endswith('.png')]
-    image_paths = [os.path.join(input_dir, file_path)
-                    for file_path in image_filename_list]
+    #image_filename_list = [i for i in os.listdir(input_dir) if i.endswith('.png')]
+    #image_paths = [os.path.join(input_dir, file_path)
+    #                for file_path in image_filename_list]
+    #num_images = len(image_paths)
 
-    num_images = len(image_paths)
+    files = os.scandir(input_dir)
+    num_images = len(files)
     print(f'num_images={num_images}')
 
     info_file = output_dir + '/image_name_path.txt'
     with open(info_file, 'w') as f:
-        for img_name, img_path in zip(image_filename_list, image_paths):
-            file_size = os.path.getsize(img_path)
+        #for img_name, img_path in zip(image_filename_list, image_paths):
+        #file_size = os.path.getsize(img_path)
+        #if file_size > 30*1024:
+        #    f.write(f"{img_name}, {img_path}\n")
+
+        for file in files:
+            file_size = os.path.getsize(file.path)
             if file_size > 30*1024:
-                f.write(f"{img_name}, {img_path}\n")
+                f.write(f"{file.name}, {file.path}\n")
 
     print('process finshed.')
 
