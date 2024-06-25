@@ -76,7 +76,7 @@ def main(input_dir, data_clean_dir, output_dir, start_index, end_index):
         img_name = 'f' + str(index) + '.png'
         img_path = os.path.join(input_dir, img_name)
 
-        if img_path.is_file():
+        if Path(img_path).is_file():
             file_size = os.path.getsize(img_path)
             print(f'img_path={img_path}, file_size={file_size}')
             num += 1
