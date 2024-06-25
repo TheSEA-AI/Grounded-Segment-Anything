@@ -75,24 +75,26 @@ def main(input_dir, data_clean_dir, output_dir, start_index, end_index):
     for index in range(start_index, end_index+1):
         img_name = 'f' + str(index) + '.png'
         img_path = os.path.join(input_dir, img_name)
-        file_size = os.path.getsize(img_path)
-        print(f'img_path={img_path}, file_size={file_size}')
-        num += 1
-        if file_size > 30*1024:
-            img = Image.open(img_path).convert("RGB")
-            img.save(data_clean_dir+'/'+img_name, 'png')
 
-            image_array = np.asarray(img)
-            hed = HWC3(image_array)
-            hed = hedDetector(hed)
-            hed = HWC3(hed)
-            hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
-            img_hed = Image.fromarray(hed)
-            img_hed.save(output_dir+'/'+img_name, 'png')
-        else:
-            filter_num.append(str(index))  
-        if num % 100 == 0:
-            print(f'num={num}')
+        if img_path.is_file():
+            file_size = os.path.getsize(img_path)
+            print(f'img_path={img_path}, file_size={file_size}')
+            num += 1
+            if file_size > 30*1024:
+                img = Image.open(img_path).convert("RGB")
+                img.save(data_clean_dir+'/'+img_name, 'png')
+
+                image_array = np.asarray(img)
+                hed = HWC3(image_array)
+                hed = hedDetector(hed)
+                hed = HWC3(hed)
+                hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
+                img_hed = Image.fromarray(hed)
+                img_hed.save(output_dir+'/'+img_name, 'png')
+            else:
+                filter_num.append(str(index))  
+            if num % 100 == 0:
+                print(f'num={num}')
     
     if len(filter_num) > 0:
         print(f'filter_num={filter_num}')
