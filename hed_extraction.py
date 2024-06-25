@@ -70,6 +70,7 @@ def main(input_dir, data_clean_dir, output_dir, start_index, end_index):
     hedDetector = HEDdetector()
 
     num = 0
+    filter_num = []
     #for img_name, img_path in zip(image_filename_list, image_paths):
     for index in range(start_index, end_index+1):
         img_name = 'f' + str(index)
@@ -88,10 +89,13 @@ def main(input_dir, data_clean_dir, output_dir, start_index, end_index):
             hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
             img_hed = Image.fromarray(hed)
             img_hed.save(output_dir+'/'+img_name, 'png')
-            
+        else:
+            filter_num.append(str(index))  
         if num % 100 == 0:
             print(f'num={num}')
     
+    if len(filter_num) > 0:
+        print(f'filter_num={filter_num}')
 
 if __name__ == "__main__":
     args = parse_args()
