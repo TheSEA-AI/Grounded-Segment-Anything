@@ -91,8 +91,10 @@ def main(input_dir, data_clean_dir, output_dir, start_index, end_index):
                 hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
                 img_hed = Image.fromarray(hed)
                 img_hed.save(output_dir+'/'+img_name, 'png')
-            else:
+            else: 
                 filter_num.append(str(index))  
+        else:
+            filter_num.append(str(index))  
             if num % 100 == 0:
                 print(f'num={num}')
     
