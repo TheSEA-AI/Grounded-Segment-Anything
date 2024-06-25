@@ -78,7 +78,7 @@ def main(input_dir, data_clean_dir, output_dir, start_index, end_index):
 
         if Path(img_path).is_file():
             file_size = os.path.getsize(img_path)
-            print(f'img_path={img_path}, file_size={file_size}')
+            #print(f'img_path={img_path}, file_size={file_size}')
             num += 1
             if file_size > 30*1024:
                 img = Image.open(img_path).convert("RGB")
@@ -95,8 +95,8 @@ def main(input_dir, data_clean_dir, output_dir, start_index, end_index):
                 filter_num.append(str(index))  
         else:
             filter_num.append(str(index))  
-            if num % 100 == 0:
-                print(f'num={num}')
+            #if num % 100 == 0:
+            #    print(f'num={num}')
     
     if len(filter_num) > 0:
         print(f'filter_num={filter_num}')
