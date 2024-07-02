@@ -103,6 +103,7 @@ def main(input_dir, data_clean_dir, output_dir, start_index, end_index):
     if len(filter_num) > 0:
         print(f'filter_num={filter_num}')
 
+##### for extracting hed images used in texture image generation model
 if __name__ == "__main__":
     args = parse_args()
     main(args.input_dir, args.data_clean_dir, args.output_dir, args.start_index, args.end_index)

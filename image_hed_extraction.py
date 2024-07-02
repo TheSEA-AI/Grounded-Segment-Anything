@@ -173,6 +173,7 @@ def hed_extraction(intput_dir, output_dir, img_format = 'png', image_resolution 
         img_save_path = output_dir + '/' + img_name
         img_masked.save(img_save_path, img_format)
 
+##### for extracting hed images where the inner lines of produts are not removed
 if __name__ == "__main__":
     args = parse_args()
     hed_extraction(args.input_dir, args.output_dir, args.img_format)

@@ -348,6 +348,8 @@ def image_outline_extraction_by_mask_multiple_product_types(intput_dir, output_d
         img_save_path = output_dir + '/' + img_name
         img_masked.save(img_save_path, img_format)
 
+
+##### for extracting hed images where the inner lines of produts are removed
 if __name__ == "__main__":
     args = parse_args()
     image_outline_extraction_by_mask_multiple_product_types(args.input_dir, args.output_dir, args.img_format)

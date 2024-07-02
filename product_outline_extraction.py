@@ -573,6 +573,7 @@ def filter_data(hed_background_dir, hed_dir, product_images):
 
     return img_similarity_dict_all
 
+##### for extracting hed images where the inner lines of produts are removed
 if __name__ == "__main__":
     args = parse_args()
     product_outline_extraction_by_mask_multiple_product_types(args.input_dir, args.output_dir, args.img_format)
