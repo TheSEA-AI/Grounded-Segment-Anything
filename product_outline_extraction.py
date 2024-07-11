@@ -1,3 +1,5 @@
+##### for extracting hed images where the inner lines of produts are removed
+
 import os, sys
 
 sys.path.append(os.path.join(os.getcwd(), "GroundingDINO"))
