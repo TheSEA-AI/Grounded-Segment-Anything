@@ -575,6 +575,68 @@ def filter_data(hed_background_dir, hed_dir, product_images):
 
     return img_similarity_dict_all
 
+def make_mask_contour(img_shape: tuple, contour: Union[list, np.ndarray]) -> np.ndarray:
+    """
+    Create a binary mask from a given contour and image shape. The mask sets pixels inside the contour to 1 (True)
+    and pixels outside to 0 (False).
+
+    Args:
+        img_shape (tuple): The shape of the image given in image coordinates, represented as (width, height).
+        contour (list or np.ndarray): The contour as outputted by OpenCV, with shape (N, 2).
+
+    Returns:
+        np.ndarray: A boolean image where the area enclosed by the contour is True and the rest is False.
+
+    Raises:
+        TypeError: If the provided contour is not in the form (N, 2), where N is the number of points.
+
+    Example::
+
+        # Usage example with OpenCV's contour output
+        img_shape = (640, 480)  # Width and height of the target image
+        contour = np.array([[100, 200], [200, 100], [300, 400]], dtype=np.int32)
+        mask = make_mask_contour(img_shape, contour)
+        # 'mask' will contain a binary mask representing the specified contour.
+    """
+
+    contour = np.array(contour, dtype=np.int32)
+    shapeC = np.shape(contour)
+
+    if len(shapeC) != 2:
+        raise ValueError("the shape is not valid")
+
+    if shapeC[1] != 2:
+        raise ValueError("the shape is not valid")
+
+    contour = contour.reshape((1, shapeC[0], 2))
+
+    mask = np.zeros((img_shape[1], img_shape[0]), dtype=np.uint8)
+    cv2.fillPoly(mask, contour, 1)
+    return mask
+
+## function for saving product hed as transparent png
+def product_hed_transparent_bg(data_hed_background_dir, data_hed_transparent_dir):
+
+    image_filename_list = [i for i in os.listdir(data_hed_background_dir) if i.endswith('.png')]
+    images_path = [os.path.join(data_hed_background_dir, file_path)
+                        for file_path in image_filename_list]
+
+    img_shape = (1024, 1024)
+    for img_name, img_path in zip(image_filename_list, images_path):
+        #print(f'img_name={img_name}')
+        img2 = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+        img2[img2 > 80] = 160
+        img2[img2 <= 80] = 0
+        ret2, thresh2 = cv2.threshold(img2, 127, 255,0)
+        contours2, hierarchy2 = cv2.findContours(thresh2,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        mask  = make_mask_contour(img_shape, contours2[0].reshape(-1,2)).astype(np.uint8)*255
+        mask = np.stack((mask,)*3, axis=-1)
+        product_image = Image.open(img_path).convert("RGB")
+        mask_img = Image.fromarray(mask).convert('L')
+        product_image.putalpha(mask_img)
+        product_image.save(data_hed_transparent_dir+'/'+img_name, 'png')
+
 ##### for extracting hed images where the inner lines of produts are removed
 if __name__ == "__main__":
     args = parse_args()
