@@ -576,29 +576,6 @@ def filter_data(hed_background_dir, hed_dir, product_images):
     return img_similarity_dict_all
 
 def make_mask_contour(img_shape: tuple, contour: Union[list, np.ndarray]) -> np.ndarray:
-    """
-    Create a binary mask from a given contour and image shape. The mask sets pixels inside the contour to 1 (True)
-    and pixels outside to 0 (False).
-
-    Args:
-        img_shape (tuple): The shape of the image given in image coordinates, represented as (width, height).
-        contour (list or np.ndarray): The contour as outputted by OpenCV, with shape (N, 2).
-
-    Returns:
-        np.ndarray: A boolean image where the area enclosed by the contour is True and the rest is False.
-
-    Raises:
-        TypeError: If the provided contour is not in the form (N, 2), where N is the number of points.
-
-    Example::
-
-        # Usage example with OpenCV's contour output
-        img_shape = (640, 480)  # Width and height of the target image
-        contour = np.array([[100, 200], [200, 100], [300, 400]], dtype=np.int32)
-        mask = make_mask_contour(img_shape, contour)
-        # 'mask' will contain a binary mask representing the specified contour.
-    """
-
     contour = np.array(contour, dtype=np.int32)
     shapeC = np.shape(contour)
 
@@ -615,7 +592,15 @@ def make_mask_contour(img_shape: tuple, contour: Union[list, np.ndarray]) -> np.
     return mask
 
 ## function for saving product hed as transparent png
-def product_hed_transparent_bg(data_hed_background_dir, data_hed_transparent_dir):
+def product_hed_transparent_bg(data_hed_background_dir):
+
+     ## create data_hed_transparent_dir
+    image_dirs = data_hed_background_dir.split('/')
+    data_hed_transparent_dir = '/'+image_dirs[0]
+    for i in range(1, len(image_dirs)-1):
+        data_hed_transparent_dir += image_dirs[i] + '/'
+    data_hed_transparent_dir += 'data_hed_transparent'
+    Path(data_hed_transparent_dir).mkdir(parents=True, exist_ok=True)
 
     image_filename_list = [i for i in os.listdir(data_hed_background_dir) if i.endswith('.png')]
     images_path = [os.path.join(data_hed_background_dir, file_path)
@@ -645,4 +630,5 @@ if __name__ == "__main__":
     if len(args.product_images) > 0:
        data_similarity_dict_all = filter_data(args.output_dir, args.data_hed_dir, *args.product_images)
        filter_hed(args.output_dir, data_similarity_dict_all, args.similarity_threshold, *args.product_images)
+       product_hed_transparent_bg(args.output_dir)
     print(f'process finished.')
