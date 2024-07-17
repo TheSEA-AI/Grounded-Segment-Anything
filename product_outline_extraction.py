@@ -242,6 +242,10 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png
         hed = hed*mask[:,:,0]
         hed = HWC3(hed)
         hed = np.where(hed<100, white_array, hed)
+
+        hed[hed > 60] = 180
+        hed[hed <= 60] = 0
+
         hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
         img_masked = Image.fromarray(hed)
         img_save_path = output_dir + '/' + img_name
@@ -342,6 +346,8 @@ def hed_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_fo
         hed = hed*mask[:,:,0]
         hed = HWC3(hed)
         hed = np.where(hed<100, white_array, hed)
+        hed[hed > 60] = 180
+        hed[hed <= 60] = 0
         hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
         img_masked = Image.fromarray(hed)
         img_save_path = output_dir + '/' + img_name
@@ -443,6 +449,10 @@ def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output
         hed = hed*mask[:,:,0]
         hed = HWC3(hed)
         hed = np.where(hed<100, white_array, hed)
+
+        hed[hed > 60] = 180
+        hed[hed <= 60] = 0
+
         hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
         img_masked = Image.fromarray(hed)
         img_save_path = output_dir + '/' + img_name
@@ -610,8 +620,8 @@ def product_hed_transparent_bg(data_hed_background_dir):
     for img_name, img_path in zip(image_filename_list, images_path):
         #print(f'img_name={img_name}')
         img2 = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-        img2[img2 > 80] = 160
-        img2[img2 <= 80] = 0
+        img2[img2 > 60] = 160
+        img2[img2 <= 60] = 0
         ret2, thresh2 = cv2.threshold(img2, 127, 255,0)
         contours2, hierarchy2 = cv2.findContours(thresh2,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
