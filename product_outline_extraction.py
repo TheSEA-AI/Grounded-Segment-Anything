@@ -30,7 +30,7 @@ from segment_anything import build_sam, SamPredictor, build_sam_hq, build_sam_hq
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-
+from typing import Union
 
 ## annotation
 from ControlNOLA.annotator.hed import HEDdetector, nms
