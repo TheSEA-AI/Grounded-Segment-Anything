@@ -620,7 +620,7 @@ def product_hed_transparent_bg(data_hed_background_dir):
     for img_name, img_path in zip(image_filename_list, images_path):
         #print(f'img_name={img_name}')
         img2 = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-        img2[img2 > 60] = 160
+        img2[img2 > 60] = 180
         img2[img2 <= 60] = 0
         ret2, thresh2 = cv2.threshold(img2, 127, 255,0)
         contours2, hierarchy2 = cv2.findContours(thresh2,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
