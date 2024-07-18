@@ -243,9 +243,6 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png
         hed = HWC3(hed)
         hed = np.where(hed<100, white_array, hed)
 
-        hed[hed > 60] = 180
-        hed[hed <= 60] = 0
-
         hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
         img_masked = Image.fromarray(hed)
         img_save_path = output_dir + '/' + img_name
@@ -346,8 +343,7 @@ def hed_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_fo
         hed = hed*mask[:,:,0]
         hed = HWC3(hed)
         hed = np.where(hed<100, white_array, hed)
-        hed[hed > 60] = 180
-        hed[hed <= 60] = 0
+       
         hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
         img_masked = Image.fromarray(hed)
         img_save_path = output_dir + '/' + img_name
@@ -449,9 +445,6 @@ def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output
         hed = hed*mask[:,:,0]
         hed = HWC3(hed)
         hed = np.where(hed<100, white_array, hed)
-
-        hed[hed > 60] = 180
-        hed[hed <= 60] = 0
 
         hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
         img_masked = Image.fromarray(hed)

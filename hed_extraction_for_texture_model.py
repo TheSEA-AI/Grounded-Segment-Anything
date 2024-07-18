@@ -90,9 +90,6 @@ def main(input_dir, data_clean_dir, output_dir, start_index, end_index):
                 hed = HWC3(image_array)
                 hed = hedDetector(hed)
                 hed = HWC3(hed)
-                
-                hed[hed > 60] = 180
-                hed[hed <= 60] = 0
 
                 hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
                 img_hed = Image.fromarray(hed)

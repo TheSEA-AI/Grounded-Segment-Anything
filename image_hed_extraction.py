@@ -169,10 +169,6 @@ def hed_extraction(intput_dir, output_dir, img_format = 'png', image_resolution 
         hed = hedDetector(hed)
         hed = HWC3(hed)
 
-        hed[hed > 60] = 180
-        hed[hed <= 60] = 0
-
-        
         hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
         img_masked = Image.fromarray(hed)
         img_save_path = output_dir + '/' + img_name
