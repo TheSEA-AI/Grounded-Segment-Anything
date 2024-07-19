@@ -461,18 +461,18 @@ def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_thresho
                         for file_path in image_filename_list]
 
     ## make a copy of origial hed images
-    image_dirs = data_hed_background_dir.split('/')
-    new_image_dir = '/'+image_dirs[0]
-    for i in range(1, len(image_dirs)-1):
-        new_image_dir += image_dirs[i] + '/'
-    new_image_dir += 'data_hed_background_original'
-    Path(new_image_dir).mkdir(parents=True, exist_ok=True)
+    #image_dirs = data_hed_background_dir.split('/')
+    #new_image_dir = '/'+image_dirs[0]
+    #for i in range(1, len(image_dirs)-1):
+    #    new_image_dir += image_dirs[i] + '/'
+    #new_image_dir += 'data_hed_background_original'
+    #Path(new_image_dir).mkdir(parents=True, exist_ok=True)
     #print(f'data_hed_background_dir={data_hed_background_dir}')
     #print(f'new_data_hed_background_dir={new_image_dir}')
 
-    for img_name, img_path in zip(image_filename_list, images_path):
-        img = Image.open(img_path).convert("RGB")
-        img.save(new_image_dir+'/'+img_name, 'png')
+    #for img_name, img_path in zip(image_filename_list, images_path):
+    #    img = Image.open(img_path).convert("RGB")
+    #    img.save(new_image_dir+'/'+img_name, 'png')
 
     ## calculate similarities
     img_similarity_dict_all = {}
@@ -536,16 +536,16 @@ def filter_data(hed_background_dir, hed_dir, product_images):
                         for file_path in image_filename_list]
 
     ## make a copy of origial hed images
-    image_dirs = hed_dir.split('/')
-    new_image_dir = '/'+image_dirs[0]
-    for i in range(1, len(image_dirs)-1):
-        new_image_dir += image_dirs[i] + '/'
-    new_image_dir += 'data_hed_original'
-    Path(new_image_dir).mkdir(parents=True, exist_ok=True)
+    #image_dirs = hed_dir.split('/')
+    #new_image_dir = '/'+image_dirs[0]
+    #for i in range(1, len(image_dirs)-1):
+    #    new_image_dir += image_dirs[i] + '/'
+    #new_image_dir += 'data_hed_original'
+    #Path(new_image_dir).mkdir(parents=True, exist_ok=True)
 
-    for img_name, img_path in zip(image_filename_list, images_path):
-        img = Image.open(img_path).convert("RGB")
-        img.save(new_image_dir+'/'+img_name, 'png')
+    #for img_name, img_path in zip(image_filename_list, images_path):
+    #    img = Image.open(img_path).convert("RGB")
+    #    img.save(new_image_dir+'/'+img_name, 'png')
 
     ### calculate similarities
     img_similarity_dict_all = {}
