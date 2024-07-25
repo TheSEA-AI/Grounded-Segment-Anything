@@ -461,18 +461,18 @@ def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_thresho
                         for file_path in image_filename_list]
 
     ## make a copy of origial hed images
-    #image_dirs = data_hed_background_dir.split('/')
-    #new_image_dir = '/'+image_dirs[0]
-    #for i in range(1, len(image_dirs)-1):
-    #    new_image_dir += image_dirs[i] + '/'
-    #new_image_dir += 'data_hed_background_original'
-    #Path(new_image_dir).mkdir(parents=True, exist_ok=True)
+    image_dirs = data_hed_background_dir.split('/')
+    new_image_dir = '/'+image_dirs[0]
+    for i in range(1, len(image_dirs)-1):
+        new_image_dir += image_dirs[i] + '/'
+    new_image_dir += 'data_hed_background_original'
+    Path(new_image_dir).mkdir(parents=True, exist_ok=True)
     #print(f'data_hed_background_dir={data_hed_background_dir}')
     #print(f'new_data_hed_background_dir={new_image_dir}')
 
-    #for img_name, img_path in zip(image_filename_list, images_path):
-    #    img = Image.open(img_path).convert("RGB")
-    #    img.save(new_image_dir+'/'+img_name, 'png')
+    for img_name, img_path in zip(image_filename_list, images_path):
+        img = Image.open(img_path).convert("RGB")
+        img.save(new_image_dir+'/'+img_name, 'png')
 
     ## calculate similarities
     img_similarity_dict_all = {}
@@ -525,6 +525,7 @@ def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_thresho
             if False not in remove:
                 os.remove(img_path)
 
+    return new_image_dir
 
 ## the filtering for data is not enabled
 ## this is mainly for calculating data similarities to be used in hed filtering
@@ -633,6 +634,6 @@ if __name__ == "__main__":
     print(f'args.product_images={args.product_images}, len(args.product_images)={len(args.product_images)}')
     if len(args.product_images) > 0:
        data_similarity_dict_all = filter_data(args.output_dir, args.data_hed_dir, args.product_images)
-       filter_hed(args.output_dir, data_similarity_dict_all, args.similarity_threshold, args.product_images)
-       product_hed_transparent_bg(args.output_dir)
+       data_hed_bg_original = filter_hed(args.output_dir, data_similarity_dict_all, args.similarity_threshold, args.product_images)
+       product_hed_transparent_bg(data_hed_bg_original)
     print(f'process finished.')
