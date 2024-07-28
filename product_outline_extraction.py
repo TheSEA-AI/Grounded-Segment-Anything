@@ -436,15 +436,17 @@ def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output
         img = img.resize((image_dim, image_dim), Image.LANCZOS)
         image_array = np.asarray(img)
 
-        white_array = np.ones_like(image_array) * 180
-        white_array = white_array * mask_all
-        white_array = white_array * mask
+        #white_array = np.ones_like(image_array) * 180
+        #white_array = white_array * mask_all
+        #white_array = white_array * mask
 
         hed = HWC3(image_array)
         hed = hedDetector(hed) * mask_all[:,:,0]
         hed = hed*mask[:,:,0]
         hed = HWC3(hed)
-        hed = np.where(hed<100, white_array, hed)
+        #hed = np.where(hed<100, white_array, hed)
+        hed[hed > 60] = 180
+        hed[hed <= 60] = 0
 
         hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
         img_masked = Image.fromarray(hed)
