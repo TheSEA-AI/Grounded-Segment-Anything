@@ -436,15 +436,15 @@ def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output
         img = img.resize((image_dim, image_dim), Image.LANCZOS)
         image_array = np.asarray(img)
 
-        #white_array = np.ones_like(image_array) * 180
-        #white_array = white_array * mask_all
-        #white_array = white_array * mask
+        white_array = np.ones_like(image_array) * 180
+        white_array = white_array * mask_all
+        white_array = white_array * mask
 
         hed = HWC3(image_array)
         hed = hedDetector(hed) * mask_all[:,:,0]
         hed = hed*mask[:,:,0]
         hed = HWC3(hed)
-        #hed = np.where(hed<100, white_array, hed)
+        hed = np.where(white_array>0, white_array, hed)
         hed[hed > 60] = 180
         hed[hed <= 60] = 0
 
@@ -598,9 +598,9 @@ def make_mask_contour(img_shape: tuple, contour: Union[list, np.ndarray]) -> np.
     return mask
 
 ## function for saving product hed as transparent png
-def product_hed_transparent_bg(data_hed_background_dir):
+def product_hed_transparent_bg(product_images, data_hed_background_dir):
 
-     ## create data_hed_transparent_dir
+    ## create data_hed_transparent_dir
     image_dirs = data_hed_background_dir.split('/')
     data_hed_transparent_dir = '/'+image_dirs[0]
     for i in range(1, len(image_dirs)-1):
@@ -612,6 +612,14 @@ def product_hed_transparent_bg(data_hed_background_dir):
     images_path = [os.path.join(data_hed_background_dir, file_path)
                         for file_path in image_filename_list]
 
+    img1 = cv2.imread(os.path.join(data_hed_background_dir, product_images[0]), cv2.IMREAD_GRAYSCALE)
+    img1[img1 > 60] = 180
+    img1[img1 <= 60] = 0
+    ret1, thresh1 = cv2.threshold(img1, 127, 255,0)
+    contours1,hierarchy1 = cv2.findContours(thresh1,2,1)
+    cnt1 = contours1[0]
+    area_cnt1 = cv2.contourArea(cnt1)
+
     img_shape = (1024, 1024)
     for img_name, img_path in zip(image_filename_list, images_path):
         #print(f'img_name={img_name}')
@@ -621,12 +629,225 @@ def product_hed_transparent_bg(data_hed_background_dir):
         ret2, thresh2 = cv2.threshold(img2, 127, 255,0)
         contours2, hierarchy2 = cv2.findContours(thresh2,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-        mask  = make_mask_contour(img_shape, contours2[0].reshape(-1,2)).astype(np.uint8)*255
-        mask = np.stack((mask,)*3, axis=-1)
-        product_image = Image.open(img_path).convert("RGB")
-        mask_img = Image.fromarray(mask).convert('L')
-        product_image.putalpha(mask_img)
-        product_image.save(data_hed_transparent_dir+'/'+img_name, 'png')
+        if len(contours2) == 2:
+          mask  = make_mask_contour(img_shape, contours2[0].reshape(-1,2)).astype(np.uint8)*255
+          mask = np.stack((mask,)*3, axis=-1)
+          tmp_image = Image.open(img_path).convert("RGB")
+          mask_img = Image.fromarray(mask).convert('L')
+          tmp_image.putalpha(mask_img)
+          tmp_image.save(data_hed_transparent_dir+'/'+img_name, 'png')
+        else:
+          index = 0
+          for cnt2 in contours2:
+            area_cnt2 = cv2.contourArea(cnt2)
+            if area_cnt2 >= 0.7*area_cnt1 and area_cnt2 <= 1.2*area_cnt1:
+              mask  = make_mask_contour(img_shape, cnt2.reshape(-1,2)).astype(np.uint8)*255
+              mask = np.stack((mask,)*3, axis=-1)
+              tmp_image = Image.open(img_path).convert("RGB")
+              mask_img = Image.fromarray(mask).convert('L')
+              tmp_image.putalpha(mask_img)
+              tmp_image.save(data_hed_transparent_dir+'/'+str(index)+img_name, 'png')
+              index += 1
+
+
+## check whether hed is over-extracted
+def examine_image_hed(product_images, data_dir, data_hed_dir, data_similarity_dict, similarity_threshold = 3.0):
+  large_value = 100
+
+  image_filename_list = [i for i in os.listdir(data_hed_dir)]
+  images_path = [os.path.join(data_hed_dir, file_path)
+                      for file_path in image_filename_list]
+
+  ## calculate similarities
+  img_similarity_dict_all = {}
+  for product_image in product_images:
+      img1 = cv2.imread(os.path.join(data_hed_dir, product_image), cv2.IMREAD_GRAYSCALE)
+      img1[img1 > 60] = 180
+      img1[img1 <= 60] = 0
+      ret1, thresh1 = cv2.threshold(img1, 127, 255,0)
+      contours1,hierarchy1 = cv2.findContours(thresh1,2,1)
+      cnt1 = contours1[0]
+      area_cnt1 = cv2.contourArea(cnt1)
+
+      img_similarity_dic = {}
+      for img_name, img_path in zip(image_filename_list, images_path):
+          if img_name not in product_images:
+              img2 = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+              img2[img2 > 60] = 180
+              img2[img2 <= 60] = 0
+              ret2, thresh2 = cv2.threshold(img2, 127, 255,0)
+              contours2,hierarchy2 = cv2.findContours(thresh2,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+              if len(contours2) > 0:
+                  for cnt2 in contours2:
+                    area_cnt2 = cv2.contourArea(cnt2)
+                    if area_cnt2 >= 0.6*area_cnt1:
+                      ret = cv2.matchShapes(cnt1,cnt2,1,0.0)
+                      if img_name not in img_similarity_dic:
+                          img_similarity_dic[img_name] = ret
+                      else:
+                          if img_similarity_dic[img_name] > ret:
+                              img_similarity_dic[img_name] = ret
+                    else:
+                      img_similarity_dic[img_name] = large_value
+              else:
+                  img_similarity_dic[img_name] = large_value
+
+      img_similarity_dict_all[product_image] = img_similarity_dic
+
+
+  ##do re-extraction
+  for img_name, img_path in zip(image_filename_list, images_path):
+      if img_name not in product_images:
+          remove = []
+
+          for k, v in img_similarity_dict_all.items():
+              data_simi_list = list(data_similarity_dict[k].values())
+              for k_product, v_product in v.items():
+                  if img_name == k_product:
+                      if min(data_simi_list) <= 0.1:
+                          v_product = v_product*10.0
+                      print(f'img_name={img_name}, similarity={v_product}, similarity_threshold={similarity_threshold}')
+                      if v_product >= similarity_threshold:
+                          remove.append(True)
+                      else:
+                          remove.append(False)
+          
+          print(f'remove={remove}')
+          if False not in remove:
+            #os.remove(img_path)
+            image_outline_re_extraction_by_mask_multiple_product_types(data_dir, img_path, img_name)
+
+
+##re-extract an image hed when hed is over-extracted.
+def image_outline_re_extraction_by_mask_multiple_product_types(data_dir, output_path, img_name, img_format = 'png', image_resolution = 1024):
+
+    img_path = data_dir + '/' + img_name
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    ckpt_repo_id = "ShilongLiu/GroundingDINO"
+    ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
+    ckpt_config_filename = "GroundingDINO_SwinB.cfg.py"
+
+    groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename, device)
+
+    sam_checkpoint_file = Path("./sam_hq_vit_h.pth")
+    if not sam_checkpoint_file.is_file():
+        sam_hq_vit_url = "https://huggingface.co/lkeab/hq-sam/resolve/main/sam_hq_vit_h.pth"
+        wget.download(sam_hq_vit_url)
+
+    sam_checkpoint = "sam_hq_vit_h.pth"
+    sam_predictor = SamPredictor(build_sam_hq_vit_h(checkpoint=sam_checkpoint).to(device))
+
+    hedDetector = HEDdetector()
+    kernel = np.ones((3, 3), np.uint8)
+    image_dim = 1024
+    
+    #####################################
+    #extract mask
+    image_source, image = load_image(img_path, image_dim)
+    product_types = ["beauty product", "cosmetic product", "skincare product", "makeup product"]
+    mask_all = np.full((image_source.shape[1],image_source.shape[1]), True, dtype=bool)
+    individual_masks = []
+    for product_type in product_types:
+        _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model)
+
+        if detected_boxes.size(0) != 0:
+            segmented_frame_masks = segment(image_source, sam_predictor, boxes=detected_boxes, device=device)
+
+            for mask in segmented_frame_masks:
+                im = np.stack((mask[0].cpu().numpy(),)*3, axis=-1)
+                im = im.astype(np.uint8)*255
+                imgray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+                _, thresh = cv2.threshold(imgray, 127, 255, 0)
+                contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                if len(contours) >= 50:
+                    continue
+
+                mask_all = mask_all & ~mask[0].cpu().numpy()
+                individual_masks.append(~mask[0].cpu().numpy())
+        else:
+            raise ValueError("the product cannot be extracted.")
+
+    ##### fill holes inside product #######
+    mask_all = ~mask_all
+    mask_all = mask_all.astype(int)
+    mask_all = ndimage.binary_fill_holes(mask_all).astype(int)
+    mask_all = mask_all.astype(bool)
+    mask_all = ~mask_all
+    ##### fill holes inside product #######
+
+    ##### fill small holes outside product #######
+    ite = 8
+    mask_all = mask_all.astype(int)
+    mask_all = ndimage.binary_closing(mask_all,iterations=ite).astype(int)
+    mask_all = mask_all.astype(bool)
+    ##### fill small holes outside product #######
+
+    ##### flip surrounding pixels due to previous fill small holes outside product #######
+    mask_all[0:ite+2, :] = True
+    mask_all[:, 0:ite+2] = True
+    mask_all[1024-ite-1:1024, :] = True
+    mask_all[:, 1024-ite-1:1024] = True
+    ##### flip surrounding pixels due to previous fill small holes outside product #######
+
+    mask_all = np.stack((mask_all,)*3, axis=-1)
+    ################
+    mask = ~mask_all
+    mask = mask.astype(np.uint8)
+    mask = cv2.dilate(mask, kernel, iterations=3)
+    mask = np.array(mask, dtype=bool)
+
+    img = Image.open(img_path).convert("RGB")
+    img = img.resize((image_dim, image_dim), Image.LANCZOS)
+    image_array = np.asarray(img)
+
+    white_array = np.ones_like(image_array) * 180
+    white_array = white_array * mask_all
+    white_array = white_array * mask
+
+    hed = HWC3(image_array)
+    hed = hedDetector(hed) * mask_all[:,:,0]
+    hed = HWC3(hed)
+    hed = np.where(white_array>0, white_array, hed)
+
+    for individual_mask in individual_masks:
+      ##### fill holes inside product #######
+      individual_mask = ~individual_mask
+      individual_mask = individual_mask.astype(int)
+      individual_mask = ndimage.binary_fill_holes(individual_mask).astype(int)
+      individual_mask = individual_mask.astype(bool)
+      individual_mask = ~individual_mask
+      ##### fill holes inside product #######
+
+      ##### fill small holes outside product #######
+      ite = 8
+      individual_mask = individual_mask.astype(int)
+      individual_mask = ndimage.binary_closing(individual_mask,iterations=ite).astype(int)
+      individual_mask = individual_mask.astype(bool)
+      ##### fill small holes outside product #######
+
+      ##### flip surrounding pixels due to previous fill small holes outside product #######
+      individual_mask[0:ite+2, :] = True
+      individual_mask[:, 0:ite+2] = True
+      individual_mask[1024-ite-1:1024, :] = True
+      individual_mask[:, 1024-ite-1:1024] = True
+      ##### flip surrounding pixels due to previous fill small holes outside product #######
+      
+      individual_mask = np.stack((individual_mask,)*3, axis=-1)
+      ################
+      tmp_mask = ~individual_mask
+      tmp_mask = tmp_mask.astype(np.uint8)
+      tmp_mask = cv2.dilate(tmp_mask, kernel, iterations=3)
+      tmp_mask = np.array(tmp_mask, dtype=bool)
+
+      tmp_white_array = np.ones_like(image_array) * 180
+      tmp_white_array = tmp_white_array * individual_mask
+      tmp_white_array = tmp_white_array * tmp_mask
+      hed = np.where(tmp_white_array>0, tmp_white_array, hed)
+
+    hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
+    img_masked = Image.fromarray(hed)
+    img_masked.save(output_path, img_format)
 
 ##### for extracting hed images where the inner lines of produts are removed
 if __name__ == "__main__":
@@ -637,5 +858,6 @@ if __name__ == "__main__":
     if len(args.product_images) > 0:
        data_similarity_dict_all = filter_data(args.output_dir, args.data_hed_dir, args.product_images)
        data_hed_bg_original = filter_hed(args.output_dir, data_similarity_dict_all, args.similarity_threshold, args.product_images)
-       product_hed_transparent_bg(data_hed_bg_original)
+       examine_image_hed(args.product_images, args.input_dir, args.data_hed_dir, data_similarity_dict_all, args.similarity_threshold)
+       product_hed_transparent_bg(args.product_images, data_hed_bg_original)
     print(f'process finished.')
