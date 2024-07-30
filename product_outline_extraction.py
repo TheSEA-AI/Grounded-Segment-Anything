@@ -629,25 +629,49 @@ def product_hed_transparent_bg(product_images, data_hed_background_dir):
         ret2, thresh2 = cv2.threshold(img2, 127, 255,0)
         contours2, hierarchy2 = cv2.findContours(thresh2,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-        if len(contours2) == 2:
-          mask  = make_mask_contour(img_shape, contours2[0].reshape(-1,2)).astype(np.uint8)*255
-          mask = np.stack((mask,)*3, axis=-1)
-          tmp_image = Image.open(img_path).convert("RGB")
-          mask_img = Image.fromarray(mask).convert('L')
-          tmp_image.putalpha(mask_img)
-          tmp_image.save(data_hed_transparent_dir+'/'+img_name, 'png')
-        else:
-          index = 0
-          for cnt2 in contours2:
-            area_cnt2 = cv2.contourArea(cnt2)
-            if area_cnt2 >= 0.7*area_cnt1 and area_cnt2 <= 1.2*area_cnt1:
-              mask  = make_mask_contour(img_shape, cnt2.reshape(-1,2)).astype(np.uint8)*255
+        if len(contours2) !=0:
+          if len(contours2) == 2:
+            area_cnt2 = cv2.contourArea(contours2[0])
+            if area_cnt2 <= 2.0*area_cnt1:
+              mask  = make_mask_contour(img_shape, contours2[0].reshape(-1,2)).astype(np.uint8)*255
               mask = np.stack((mask,)*3, axis=-1)
               tmp_image = Image.open(img_path).convert("RGB")
               mask_img = Image.fromarray(mask).convert('L')
               tmp_image.putalpha(mask_img)
-              tmp_image.save(data_hed_transparent_dir+'/'+str(index)+img_name, 'png')
-              index += 1
+              tmp_image.save(data_hed_transparent_dir+'/'+img_name, 'png')
+          else:
+            index = 0
+            rec_center = []
+            for cnt2 in contours2:
+              area_cnt2 = cv2.contourArea(cnt2)
+              rec = cv2.minAreaRect(cnt2)
+
+              if area_cnt2 >= 0.3*area_cnt1 and area_cnt2 <= 1.6*area_cnt1:
+                if len(rec_center) == 0:
+                  rec_center.append(rec[0])
+
+                  mask  = make_mask_contour(img_shape, cnt2.reshape(-1,2)).astype(np.uint8)*255
+                  mask = np.stack((mask,)*3, axis=-1)
+                  tmp_image = Image.open(img_path).convert("RGB")
+                  mask_img = Image.fromarray(mask).convert('L')
+                  tmp_image.putalpha(mask_img)
+                  tmp_image.save(data_hed_transparent_dir+'/'+str(index)+img_name, 'png')
+                  index += 1
+                elif rec[0] not in rec_center:
+                  dist = 1000
+                  for rec_c in rec_center:
+                    tmp_dist = np.linalg.norm(np.array(rec[0])-np.array(rec_c))
+                    if tmp_dist < dist:
+                      dist = tmp_dist
+                  if dist > 1.0:
+                    rec_center.append(rec[0])
+                    mask  = make_mask_contour(img_shape, cnt2.reshape(-1,2)).astype(np.uint8)*255
+                    mask = np.stack((mask,)*3, axis=-1)
+                    tmp_image = Image.open(img_path).convert("RGB")
+                    mask_img = Image.fromarray(mask).convert('L')
+                    tmp_image.putalpha(mask_img)
+                    tmp_image.save(data_hed_transparent_dir+'/'+str(index)+img_name, 'png')
+                    index += 1
 
 
 ## check whether hed is over-extracted
