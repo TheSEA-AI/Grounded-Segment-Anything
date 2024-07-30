@@ -213,7 +213,7 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png
                 imgray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
                 _, thresh = cv2.threshold(imgray, 127, 255, 0)
                 contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-                print(f'img_name={img_name},len(contours)={len(contours)}')
+                #print(f'img_name={img_name},len(contours)={len(contours)}')
                 if len(contours) >= 20:
                     continue
 
@@ -533,7 +533,7 @@ def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_thresho
 ## this is mainly for calculating data similarities to be used in hed filtering
 def filter_data(hed_background_dir, hed_dir, product_images):
 
-    print(f'product_images={product_images}')
+    #print(f'product_images={product_images}')
     image_filename_list = [i for i in os.listdir(hed_dir)]
     images_path = [os.path.join(hed_dir, file_path)
                         for file_path in image_filename_list]
@@ -651,7 +651,7 @@ def product_hed_transparent_bg(product_images, data_hed_background_dir):
 
 
 ## check whether hed is over-extracted
-def examine_image_hed(product_images, data_dir, data_hed_dir, data_similarity_dict, similarity_threshold = 3.0):
+def examine_image_hed(product_images, data_dir, data_hed_dir, data_similarity_dict, similarity_threshold = 0.916):
   large_value = 100
 
   image_filename_list = [i for i in os.listdir(data_hed_dir)]
@@ -706,13 +706,13 @@ def examine_image_hed(product_images, data_dir, data_hed_dir, data_similarity_di
                   if img_name == k_product:
                       if min(data_simi_list) <= 0.1:
                           v_product = v_product*10.0
-                      print(f'img_name={img_name}, similarity={v_product}, similarity_threshold={similarity_threshold}')
+                      #print(f'img_name={img_name}, similarity={v_product}, similarity_threshold={similarity_threshold}')
                       if v_product >= similarity_threshold:
                           remove.append(True)
                       else:
                           remove.append(False)
           
-          print(f'remove={remove}')
+          #print(f'remove={remove}')
           if False not in remove:
             #os.remove(img_path)
             image_outline_re_extraction_by_mask_multiple_product_types(data_dir, img_path, img_name)
