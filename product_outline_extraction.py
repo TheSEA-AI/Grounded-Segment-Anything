@@ -74,11 +74,11 @@ def parse_args(input_args=None):
                         type=str, 
                         help="Path to the image.")
     
-    #parser.add_argument("--product_images",
-    #                    nargs='+', 
-    #                    default=[],
-    #                    required=False,
-    #                    help="The background image with the product")
+    parser.add_argument("--gpu_id", 
+                        default=None, 
+                        type=int, 
+                        required=True,
+                        help="gpu id")
 
     parser.add_argument("--product_images",
                     nargs='+', 
@@ -171,10 +171,9 @@ def get_product_position(mask):
       break
   return row_position, col_position
 
-def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png', product_type = "beauty product", image_resolution = 1024):
+def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png', product_type = "beauty product", image_resolution = 1024, device='cuda'):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True) 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     ckpt_repo_id = "ShilongLiu/GroundingDINO"
     ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
@@ -249,10 +248,9 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png
         img_masked.save(img_save_path, img_format)
 
 
-def hed_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_format = 'png', image_resolution = 1024):
+def hed_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_format = 'png', image_resolution = 1024, device='cuda'):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True)
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     ckpt_repo_id = "ShilongLiu/GroundingDINO"
     ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
@@ -351,10 +349,9 @@ def hed_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_fo
 
 ##the latest version with multiple product types and filling holes etc.
 ##the holes are becasue of SAM noise
-def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_format = 'png', image_resolution = 1024):
+def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_format = 'png', image_resolution = 1024, device='cuda'):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True)
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     ckpt_repo_id = "ShilongLiu/GroundingDINO"
     ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
@@ -675,7 +672,7 @@ def product_hed_transparent_bg(product_images, data_hed_background_dir):
 
 
 ## check whether hed is over-extracted
-def examine_image_hed(product_images, data_dir, data_hed_dir, data_similarity_dict, similarity_threshold = 0.916):
+def examine_image_hed(product_images, data_dir, data_hed_dir, data_similarity_dict, similarity_threshold = 0.916, device='cuda'):
   large_value = 100
 
   image_filename_list = [i for i in os.listdir(data_hed_dir)]
@@ -739,14 +736,13 @@ def examine_image_hed(product_images, data_dir, data_hed_dir, data_similarity_di
           #print(f'remove={remove}')
           if False not in remove:
             #os.remove(img_path)
-            image_outline_re_extraction_by_mask_multiple_product_types(data_dir, img_path, img_name)
+            image_outline_re_extraction_by_mask_multiple_product_types(data_dir, img_path, img_name, device=device)
 
 
 ##re-extract an image hed when hed is over-extracted.
-def image_outline_re_extraction_by_mask_multiple_product_types(data_dir, output_path, img_name, img_format = 'png', image_resolution = 1024):
+def image_outline_re_extraction_by_mask_multiple_product_types(data_dir, output_path, img_name, img_format = 'png', image_resolution = 1024, device='cuda'):
 
     img_path = data_dir + '/' + img_name
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     ckpt_repo_id = "ShilongLiu/GroundingDINO"
     ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
@@ -876,12 +872,13 @@ def image_outline_re_extraction_by_mask_multiple_product_types(data_dir, output_
 ##### for extracting hed images where the inner lines of produts are removed
 if __name__ == "__main__":
     args = parse_args()
-    product_outline_extraction_by_mask_multiple_product_types(args.input_dir, args.output_dir, args.img_format)
+    device = torch.device(args.gpu_id)
+    product_outline_extraction_by_mask_multiple_product_types(args.input_dir, args.output_dir, args.img_format, device=device)
     print(f'similarity={args.similarity_threshold}')
     print(f'args.product_images={args.product_images}, len(args.product_images)={len(args.product_images)}')
     if len(args.product_images) > 0:
        data_similarity_dict_all = filter_data(args.output_dir, args.data_hed_dir, args.product_images)
        data_hed_bg_original = filter_hed(args.output_dir, data_similarity_dict_all, args.similarity_threshold, args.product_images)
-       examine_image_hed(args.product_images, args.input_dir, args.data_hed_dir, data_similarity_dict_all, args.similarity_threshold)
+       examine_image_hed(args.product_images, args.input_dir, args.data_hed_dir, data_similarity_dict_all, args.similarity_threshold, device=device)
        product_hed_transparent_bg(args.product_images, data_hed_bg_original)
     print(f'process finished.')

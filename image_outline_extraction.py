@@ -71,6 +71,12 @@ def parse_args(input_args=None):
                         type=str, 
                         required=False,
                         help="The type of the product.")
+    
+    parser.add_argument("--gpu_id", 
+                        default=None, 
+                        type=int, 
+                        required=True,
+                        help="gpu id")
 
     if input_args is not None:
         args = parser.parse_args(input_args)
@@ -152,10 +158,9 @@ def get_product_position(mask):
   return row_position, col_position
 
 
-def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png', product_type = "beauty product", image_resolution = 1024):
+def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png', product_type = "beauty product", image_resolution = 1024, device='cuda'):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True) 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     ckpt_repo_id = "ShilongLiu/GroundingDINO"
     ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
@@ -251,10 +256,10 @@ def hed_extration(intput_dir, output_dir, img_format = 'png', image_resolution =
 
 ##the latest version with multiple product types and filling holes etc.
 ##the holes are becasue of SAM noise
-def image_outline_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_format = 'png', image_resolution = 1024):
+def image_outline_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_format = 'png', image_resolution = 1024, device='cuda'):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True)
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    
 
     ckpt_repo_id = "ShilongLiu/GroundingDINO"
     ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
@@ -354,7 +359,8 @@ def image_outline_extraction_by_mask_multiple_product_types(intput_dir, output_d
 ##### for extracting hed images where the inner lines of produts are removed
 if __name__ == "__main__":
     args = parse_args()
-    image_outline_extraction_by_mask_multiple_product_types(args.input_dir, args.output_dir, args.img_format)
+    device = torch.device(args.gpu_id)
+    image_outline_extraction_by_mask_multiple_product_types(args.input_dir, args.output_dir, args.img_format, device=device)
     print(f'process finished.')
     #row_position, col_position = row_col_position(args.img_path, args.product_type)
     #print(f'row_position={row_position},col_position={col_position}')
