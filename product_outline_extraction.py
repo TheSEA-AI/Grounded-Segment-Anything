@@ -105,6 +105,8 @@ def load_model_hf(repo_id, filename, ckpt_config_filename, device='cuda'):
 
     args = SLConfig.fromfile(cache_config_file)
     #args.device = device
+    device = 'cuda:'+str(device)
+    print(f'device={device}')
     model = build_model(args)
 
     cache_file = hf_hub_download(repo_id=repo_id, filename=filename)
