@@ -90,7 +90,7 @@ def load_model_hf(repo_id, filename, ckpt_config_filename, device='cpu'):
     cache_config_file = hf_hub_download(repo_id=repo_id, filename=ckpt_config_filename)
 
     args = SLConfig.fromfile(cache_config_file)
-    args.device = device
+    #args.device = device
     model = build_model(args)
 
     cache_file = hf_hub_download(repo_id=repo_id, filename=filename)
