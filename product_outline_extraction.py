@@ -34,7 +34,7 @@ from typing import Union
 
 ## annotation
 from ControlNOLA.annotator.hed import HEDdetector, nms
-from annotator.util import HWC3, resize_image
+from ControlNOLA.annotator.util import HWC3, resize_image
 
 # diffusers
 import PIL
