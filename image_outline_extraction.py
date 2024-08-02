@@ -73,9 +73,9 @@ def parse_args(input_args=None):
                         help="The type of the product.")
     
     parser.add_argument("--gpu_id", 
-                        default=None, 
+                        default=0, 
                         type=int, 
-                        required=True,
+                        required=False,
                         help="gpu id")
 
     if input_args is not None:
