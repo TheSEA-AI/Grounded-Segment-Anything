@@ -1,6 +1,7 @@
 ##### for extracting hed images where the inner lines of produts are removed
 
 import os, sys
+import gc
 
 sys.path.append(os.path.join(os.getcwd(), "GroundingDINO"))
 sys.path.append(os.path.join(os.getcwd(), "ControlNOLA"))
@@ -100,18 +101,17 @@ def parse_args(input_args=None):
     return args
     
 
-def load_model_hf(repo_id, filename, ckpt_config_filename, device='cuda'):
+def load_model_hf(repo_id, filename, ckpt_config_filename):
     cache_config_file = hf_hub_download(repo_id=repo_id, filename=ckpt_config_filename)
 
     args = SLConfig.fromfile(cache_config_file)
-    print(f'device={device}')
     model = build_model(args)
 
     cache_file = hf_hub_download(repo_id=repo_id, filename=filename)
     #checkpoint = torch.load(cache_file, map_location=device)
     checkpoint = torch.load(cache_file)
     log = model.load_state_dict(clean_state_dict(checkpoint['model']), strict=False)
-    model.to(device)
+    #model.to(device)
     print("Model loaded from {} \n => {}".format(cache_file, log))
     _ = model.eval()
     return model
@@ -181,7 +181,7 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png
     ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
     ckpt_config_filename = "GroundingDINO_SwinB.cfg.py"
 
-    groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename, device)
+    groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename).to(device)
 
     sam_checkpoint_file = Path("./sam_hq_vit_h.pth")
     if not sam_checkpoint_file.is_file():
@@ -258,7 +258,7 @@ def hed_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_fo
     ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
     ckpt_config_filename = "GroundingDINO_SwinB.cfg.py"
 
-    groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename, device)
+    groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename).to(device)
 
     sam_checkpoint_file = Path("./sam_hq_vit_h.pth")
     if not sam_checkpoint_file.is_file():
@@ -359,7 +359,7 @@ def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output
     ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
     ckpt_config_filename = "GroundingDINO_SwinB.cfg.py"
 
-    groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename, device)
+    groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename).to(device)
 
     sam_checkpoint_file = Path("./sam_hq_vit_h.pth")
     if not sam_checkpoint_file.is_file():
@@ -451,6 +451,11 @@ def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output
         img_masked = Image.fromarray(hed)
         img_save_path = output_dir + '/' + img_name
         img_masked.save(img_save_path, img_format)
+    
+    groundingdino_model = None
+    sam_predictor = None
+    gc.collect()
+    torch.cuda.empty_cache()
 
 ## function for data hed background filtering
 def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_threshold, product_images):
@@ -750,7 +755,7 @@ def image_outline_re_extraction_by_mask_multiple_product_types(data_dir, output_
     ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
     ckpt_config_filename = "GroundingDINO_SwinB.cfg.py"
 
-    groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename, device)
+    groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename).to(device)
 
     sam_checkpoint_file = Path("./sam_hq_vit_h.pth")
     if not sam_checkpoint_file.is_file():
@@ -870,6 +875,11 @@ def image_outline_re_extraction_by_mask_multiple_product_types(data_dir, output_
     hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
     img_masked = Image.fromarray(hed)
     img_masked.save(output_path, img_format)
+
+    groundingdino_model = None
+    sam_predictor = None
+    gc.collect()
+    torch.cuda.empty_cache()
 
 ##### for extracting hed images where the inner lines of produts are removed
 if __name__ == "__main__":
