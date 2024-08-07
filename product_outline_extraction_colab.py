@@ -362,12 +362,13 @@ def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output
     ckpt_config_filename = "GroundingDINO_SwinB.cfg.py"
 
     groundingdino_model = load_model_hf(ckpt_repo_id, ckpt_filenmae, ckpt_config_filename).to(device)
+    print(f'test 2')
 
     sam_checkpoint_file = Path("./sam_hq_vit_h.pth")
     if not sam_checkpoint_file.is_file():
         sam_hq_vit_url = "https://huggingface.co/lkeab/hq-sam/resolve/main/sam_hq_vit_h.pth"
         wget.download(sam_hq_vit_url)
-
+    print(f'test 3')
     sam_checkpoint = "sam_hq_vit_h.pth"
     sam_predictor = SamPredictor(build_sam_hq_vit_h(checkpoint=sam_checkpoint).to(device))
 
