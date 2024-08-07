@@ -927,8 +927,8 @@ if __name__ == "__main__":
     print(f'similarity={args.similarity_threshold}')
     #print(f'args.product_images={args.product_images}, len(args.product_images)={len(args.product_images)}')
     if args.product_images is not None:
-       data_similarity_dict_all = filter_data(args.output_dir, args.data_hed_dir, args.product_images)
-       data_hed_bg_original = filter_hed(args.output_dir, data_similarity_dict_all, args.similarity_threshold, args.product_images)
-       examine_image_hed(args.product_images, args.input_dir, args.data_hed_dir, data_similarity_dict_all, args.similarity_threshold, device=device)
-       product_hed_transparent_bg(args.product_images, data_hed_bg_original)
+       data_similarity_dict_all = filter_data(args.output_dir, args.data_hed_dir, [args.product_images])
+       data_hed_bg_original = filter_hed(args.output_dir, data_similarity_dict_all, args.similarity_threshold, [args.product_images])
+       examine_image_hed([args.product_images], args.input_dir, args.data_hed_dir, data_similarity_dict_all, args.similarity_threshold, device=device)
+       product_hed_transparent_bg([args.product_images], data_hed_bg_original)
     print(f'process finished.')
