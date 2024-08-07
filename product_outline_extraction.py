@@ -512,6 +512,32 @@ def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_thresho
         img_similarity_dict_all[product_image] = img_similarity_dic
 
 
+    ##measure similarity
+    candidates = {}
+    for img_name, img_path in zip(image_filename_list, images_path):
+        if img_name not in product_images:
+            remove = []
+
+            global_similarity = 1000
+            for k, v in img_similarity_dict_all.items():
+                data_simi_list = list(data_similarity_dict[k].values())
+                for k_product, v_product in v.items():
+                    if img_name == k_product:
+                        if min(data_simi_list) <= 0.1:
+                            v_product = v_product*10.0
+
+                        if global_similarity > v_product:
+                            global_similarity = v_product 
+
+                        if v_product >= similarity_threshold:
+                            remove.append(True)
+                        else:
+                            remove.append(False)
+                
+            if False in remove:
+                candidates[img_name] = global_similarity
+                #os.remove(img_path)
+
     ##do filtering
     for img_name, img_path in zip(image_filename_list, images_path):
         if img_name not in product_images:
@@ -530,6 +556,18 @@ def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_thresho
                 
             if False not in remove:
                 os.remove(img_path)
+    
+    ## remove more than 2 images
+    if len(candidates.keys()) > 2:
+        similarity_list = list(candidates.values())
+        similarity_list.sort()
+
+        for k, v in candidates.items():
+            for img_name, img_path in zip(image_filename_list, images_path):
+                if img_name not in product_images:
+                    if k == img_name:
+                        if v > similarity_list[1]:
+                            os.remove(img_path)
 
     return new_image_dir
 
