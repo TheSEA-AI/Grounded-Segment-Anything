@@ -534,7 +534,7 @@ def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_thresho
                         else:
                             remove.append(False)
                 
-            if True not in remove:
+            if False in remove:
                 candidates[img_name] = global_similarity
                 #os.remove(img_path)
 
