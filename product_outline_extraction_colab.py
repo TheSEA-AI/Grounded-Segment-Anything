@@ -563,7 +563,7 @@ def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_thresho
         similarity_list.sort()
 
         for k, v in candidates.items():
-            print('img name={k}, similarity={v}')
+            print(f'img name={k}, similarity={v}')
             for img_name, img_path in zip(image_filename_list, images_path):
                 if img_name not in product_images:
                     if k == img_name:
