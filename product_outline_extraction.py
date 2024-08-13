@@ -464,9 +464,10 @@ def product_outline_extraction_by_mask_multiple_product_types(args, intput_dir, 
     torch.cuda.empty_cache()
 
 ## function for data hed background filtering
-def filter_hed(args, data_hed_background_dir, data_similarity_dict, similarity_threshold, product_images):
+def filter_hed(args, data_hed_background_dir, data_similarity_dict, similarity_threshold, product_images, img_format = 'png'):
 
     large_value = 100
+    kernel = np.ones((3, 3), np.uint8)
 
     image_filename_list = [i for i in os.listdir(data_hed_background_dir)]
     images_path = [os.path.join(data_hed_background_dir, file_path)
@@ -495,6 +496,7 @@ def filter_hed(args, data_hed_background_dir, data_similarity_dict, similarity_t
         ret1, thresh1 = cv2.threshold(img1, 127, 255,0)
         contours1,hierarchy1 = cv2.findContours(thresh1,2,1)
         cnt1 = contours1[0]
+        area_cnt1 = cv2.contourArea(cnt1)
 
         img_similarity_dic = {}
         for img_name, img_path in zip(image_filename_list, images_path):
@@ -512,6 +514,17 @@ def filter_hed(args, data_hed_background_dir, data_similarity_dict, similarity_t
                     else:
                         if img_similarity_dic[img_name] > ret:
                             img_similarity_dic[img_name] = ret
+                elif len(contours2) > 2:
+                    for cnt2 in contours2:
+                        area_cnt2 = cv2.contourArea(cnt2)
+                        if area_cnt2 >= 0.6*area_cnt1:
+                          ret = cv2.matchShapes(cnt1,cnt2,1,0.0)
+                          
+                          if img_name not in img_similarity_dic:
+                              img_similarity_dic[img_name] = ret
+                          else:
+                              if img_similarity_dic[img_name] > ret:
+                                  img_similarity_dic[img_name] = ret
                 else:
                     img_similarity_dic[img_name] = large_value
 
@@ -533,15 +546,16 @@ def filter_hed(args, data_hed_background_dir, data_similarity_dict, similarity_t
                             v_product = v_product*10.0
 
                         if global_similarity > v_product:
-                            global_similarity = v_product 
+                            global_similarity = v_product
 
                         if v_product >= similarity_threshold:
                             remove.append(True)
                         else:
                             remove.append(False)
-                
+
             if False in remove:
                 candidates[img_name] = global_similarity
+                #print(f'img_name={img_name}, minimum similarity={global_similarity}')
                 #os.remove(img_path)
 
     ##do filtering
@@ -549,26 +563,68 @@ def filter_hed(args, data_hed_background_dir, data_similarity_dict, similarity_t
         if img_name not in product_images:
             remove = []
 
+            target_similarity = 1000
             for k, v in img_similarity_dict_all.items():
                 data_simi_list = list(data_similarity_dict[k].values())
                 for k_product, v_product in v.items():
                     if img_name == k_product:
+                        if target_similarity > v_product:
+                            target_similarity = v_product
                         if min(data_simi_list) <= 0.1:
                             v_product = v_product*10.0
                         if v_product >= similarity_threshold:
                             remove.append(True)
                         else:
                             remove.append(False)
-                
+
             if False not in remove:
                 os.remove(img_path)
-    
+            else:##mask unwanted objects in images with more than two contours、
+                #masks = []
+                img2 = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+                img2[img2 > 60] = args.hed_value
+                img2[img2 <= 60] = 0
+                ret2, thresh2 = cv2.threshold(img2, 127, 255,0)
+                contours2,hierarchy2 = cv2.findContours(thresh2,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                if len(contours2) > 2:
+                    img_shape = (1024, 1024)
+                    tmp_image = np.asarray(Image.open(img_path).convert("RGB"))
+                    for cnt2 in contours2:
+                        tmp_similarity = 10000
+                        for product_image in product_images:
+                            img1 = cv2.imread(os.path.join(data_hed_background_dir, product_image), cv2.IMREAD_GRAYSCALE)
+                            img1[img1 > 60] = args.hed_value
+                            img1[img1 <= 60] = 0
+                            ret1, thresh1 = cv2.threshold(img1, 127, 255,0)
+                            contours1,hierarchy1 = cv2.findContours(thresh1,2,1)
+                            cnt1 = contours1[0]
+
+                            ret = cv2.matchShapes(cnt1,cnt2,1,0.0)
+                            if tmp_similarity > ret:
+                                tmp_similarity = ret
+
+                        if tmp_similarity == target_similarity:
+                          mask  = make_mask_contour(img_shape, cnt2.reshape(-1,2)).astype(bool)
+                          mask = np.stack((~mask,)*3, axis=-1)
+
+                          tmp_mask = ~mask
+                          tmp_mask = tmp_mask.astype(np.uint8)
+                          tmp_mask = cv2.dilate(tmp_mask, kernel, iterations=3)
+                          tmp_mask = np.array(tmp_mask, dtype=bool)
+
+                          tmp_white_array = np.ones_like(tmp_image) * args.hed_value
+                          tmp_white_array = tmp_white_array * mask
+                          tmp_white_array = tmp_white_array * tmp_mask
+                          tmp_image = Image.fromarray(tmp_white_array)
+                          tmp_image.save(img_path, img_format)
+
     ## remove more than 2 images
     if len(candidates.keys()) > 2:
         similarity_list = list(candidates.values())
         similarity_list.sort()
 
         for k, v in candidates.items():
+            #print(f'img name={k}, similarity={v}')
             for img_name, img_path in zip(image_filename_list, images_path):
                 if img_name not in product_images:
                     if k == img_name:
