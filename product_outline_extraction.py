@@ -165,19 +165,6 @@ def draw_mask(mask, image, random_color=True):
 
     return np.array(Image.alpha_composite(annotated_frame_pil, mask_image_pil))
 
-def get_product_position(mask):
-  row_position = 0
-  col_position = 0
-  for row in range(0,mask.shape[0]):
-    if any(x == False for x in mask[row,:]):
-      row_position = row
-      break
-
-  for column in range(0,mask.shape[1]):
-    if any(x == False for x in mask[:,column]):
-      col_position = column
-      break
-  return row_position, col_position
 
 def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png', product_type = "beauty product", image_resolution = 1024, device='cuda'):
 
@@ -986,11 +973,11 @@ if __name__ == "__main__":
     args = parse_args()
     device = torch.device(args.gpu_id)
     product_outline_extraction_by_mask_multiple_product_types(args, args.input_dir, args.output_dir, args.img_format, device=device)
-    print(f'similarity={args.similarity_threshold}')
-    print(f'args.product_images={args.product_images}, len(args.product_images)={len(args.product_images)}')
+    #print(f'similarity={args.similarity_threshold}')
+    #print(f'args.product_images={args.product_images}, len(args.product_images)={len(args.product_images)}')
     if len(args.product_images) > 0:
        data_similarity_dict_all = filter_data(args, args.output_dir, args.data_hed_dir, args.product_images)
        data_hed_bg_original = filter_hed(args, args.output_dir, data_similarity_dict_all, args.similarity_threshold, args.product_images)
        examine_image_hed(args, args.product_images, args.input_dir, args.data_hed_dir, data_similarity_dict_all, args.similarity_threshold, device=device)
        product_hed_transparent_bg(args, args.product_images, data_hed_bg_original)
-    print(f'process finished.')
+    print(f'product outline extraction process finished.')

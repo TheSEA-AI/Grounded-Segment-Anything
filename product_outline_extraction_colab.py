@@ -165,15 +165,6 @@ def draw_mask(mask, image, random_color=True):
 
     return np.array(Image.alpha_composite(annotated_frame_pil, mask_image_pil))
 
-def adjust_gamma(image, gamma=0.2):
-	# build a lookup table mapping the pixel values [0, 255] to
-	# their adjusted gamma values
-	invGamma = 1.0 / gamma
-	table = np.array([((i / 255.0) ** invGamma) * 255
-		for i in np.arange(0, 256)]).astype("uint8")
-	# apply gamma correction using the lookup table
-	return cv2.LUT(image, table)
-
 def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png', product_type = "beauty product", image_resolution = 1024, device='cuda'):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True) 
@@ -352,7 +343,7 @@ def hed_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_fo
 
 ##the latest version with multiple product types and filling holes etc.
 ##the holes are becasue of SAM noise
-def product_outline_extraction_by_mask_multiple_product_types(args, product_images, intput_dir, output_dir, img_format = 'png', image_resolution = 1024, device='cuda'):
+def product_outline_extraction_by_mask_multiple_product_types(args, intput_dir, output_dir, img_format = 'png', image_resolution = 1024, device='cuda'):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
@@ -435,10 +426,6 @@ def product_outline_extraction_by_mask_multiple_product_types(args, product_imag
         img = Image.open(img_path).convert("RGB")
         img = img.resize((image_dim, image_dim), Image.LANCZOS)
         image_array = np.asarray(img)
-        
-        if product_images is not None:
-            if img_name in product_images:
-                image_array = adjust_gamma(image_array, gamma=0.2)
 
         white_array = np.ones_like(image_array) * args.hed_value
         white_array = white_array * mask_all
@@ -984,7 +971,7 @@ def image_outline_re_extraction_by_mask_multiple_product_types(data_dir, output_
 if __name__ == "__main__":
     args = parse_args()
     device = torch.device(args.gpu_id)
-    product_outline_extraction_by_mask_multiple_product_types(args, args.product_images, args.input_dir, args.output_dir, args.img_format, device=device)
+    product_outline_extraction_by_mask_multiple_product_types(args, args.input_dir, args.output_dir, args.img_format, device=device)
     #print(f'similarity={args.similarity_threshold}')
     #print(f'args.product_images={args.product_images}, len(args.product_images)={len(args.product_images)}')
     if args.product_images is not None:
