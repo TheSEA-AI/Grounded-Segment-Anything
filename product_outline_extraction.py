@@ -93,6 +93,12 @@ def parse_args(input_args=None):
                         required=False,
                         help="The threshold to remove hed images")
 
+    parser.add_argument("--hed_value", 
+                        default=190, 
+                        type=int, 
+                        required=False,
+                        help="The hed value for product")
+
     if input_args is not None:
         args = parser.parse_args(input_args)
     else:
@@ -234,7 +240,7 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png
         img = img.resize((image_dim, image_dim), Image.LANCZOS)
         image_array = np.asarray(img)
 
-        white_array = np.ones_like(image_array) * 180
+        white_array = np.ones_like(image_array) * args.hed_value
         white_array = white_array * mask_all
         white_array = white_array * mask
 
@@ -334,7 +340,7 @@ def hed_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_fo
         img = img.resize((image_dim, image_dim), Image.LANCZOS)
         image_array = np.asarray(img)
 
-        white_array = np.ones_like(image_array) * 180
+        white_array = np.ones_like(image_array) * args.hed_value
         white_array = white_array * mask_all
         white_array = white_array * mask
 
@@ -351,7 +357,7 @@ def hed_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_fo
 
 ##the latest version with multiple product types and filling holes etc.
 ##the holes are becasue of SAM noise
-def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_format = 'png', image_resolution = 1024, device='cuda'):
+def product_outline_extraction_by_mask_multiple_product_types(args, intput_dir, output_dir, img_format = 'png', image_resolution = 1024, device='cuda'):
 
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
@@ -435,7 +441,7 @@ def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output
         img = img.resize((image_dim, image_dim), Image.LANCZOS)
         image_array = np.asarray(img)
 
-        white_array = np.ones_like(image_array) * 180
+        white_array = np.ones_like(image_array) * args.hed_value
         white_array = white_array * mask_all
         white_array = white_array * mask
 
@@ -444,7 +450,7 @@ def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output
         hed = hed*mask[:,:,0]
         hed = HWC3(hed)
         hed = np.where(white_array>0, white_array, hed)
-        hed[hed > 60] = 180
+        hed[hed > 60] = args.hed_value
         hed[hed <= 60] = 0
 
         hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
@@ -458,7 +464,7 @@ def product_outline_extraction_by_mask_multiple_product_types(intput_dir, output
     torch.cuda.empty_cache()
 
 ## function for data hed background filtering
-def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_threshold, product_images):
+def filter_hed(args, data_hed_background_dir, data_similarity_dict, similarity_threshold, product_images):
 
     large_value = 100
 
@@ -484,7 +490,7 @@ def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_thresho
     img_similarity_dict_all = {}
     for product_image in product_images:
         img1 = cv2.imread(os.path.join(data_hed_background_dir, product_image), cv2.IMREAD_GRAYSCALE)
-        img1[img1 > 60] = 180
+        img1[img1 > 60] = args.hed_value
         img1[img1 <= 60] = 0
         ret1, thresh1 = cv2.threshold(img1, 127, 255,0)
         contours1,hierarchy1 = cv2.findContours(thresh1,2,1)
@@ -494,7 +500,7 @@ def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_thresho
         for img_name, img_path in zip(image_filename_list, images_path):
             if img_name not in product_images:
                 img2 = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-                img2[img2 > 60] = 180
+                img2[img2 > 60] = args.hed_value
                 img2[img2 <= 60] = 0
                 ret2, thresh2 = cv2.threshold(img2, 127, 255,0)
                 contours2,hierarchy2 = cv2.findContours(thresh2,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -573,7 +579,7 @@ def filter_hed(data_hed_background_dir, data_similarity_dict, similarity_thresho
 
 ## the filtering for data is not enabled
 ## this is mainly for calculating data similarities to be used in hed filtering
-def filter_data(hed_background_dir, hed_dir, product_images):
+def filter_data(args, hed_background_dir, hed_dir, product_images):
 
     #print(f'product_images={product_images}')
     image_filename_list = [i for i in os.listdir(hed_dir)]
@@ -581,22 +587,22 @@ def filter_data(hed_background_dir, hed_dir, product_images):
                         for file_path in image_filename_list]
 
     ## make a copy of origial hed images
-    #image_dirs = hed_dir.split('/')
-    #new_image_dir = '/'+image_dirs[0]
-    #for i in range(1, len(image_dirs)-1):
-    #    new_image_dir += image_dirs[i] + '/'
-    #new_image_dir += 'data_hed_original'
-    #Path(new_image_dir).mkdir(parents=True, exist_ok=True)
+    image_dirs = hed_dir.split('/')
+    new_image_dir = '/'+image_dirs[0]
+    for i in range(1, len(image_dirs)-1):
+        new_image_dir += image_dirs[i] + '/'
+    new_image_dir += 'data_hed_original'
+    Path(new_image_dir).mkdir(parents=True, exist_ok=True)
 
-    #for img_name, img_path in zip(image_filename_list, images_path):
-    #    img = Image.open(img_path).convert("RGB")
-    #    img.save(new_image_dir+'/'+img_name, 'png')
+    for img_name, img_path in zip(image_filename_list, images_path):
+        img = Image.open(img_path).convert("RGB")
+        img.save(new_image_dir+'/'+img_name, 'png')
 
     ### calculate similarities
     img_similarity_dict_all = {}
     for product_image in product_images:
         img1 = cv2.imread(os.path.join(hed_background_dir, product_image), cv2.IMREAD_GRAYSCALE)
-        img1[img1 > 60] = 180
+        img1[img1 > 60] = args.hed_value
         img1[img1 <= 60] = 0
         ret1, thresh1 = cv2.threshold(img1, 127, 255,0)
         contours1,hierarchy1 = cv2.findContours(thresh1,2,1)
@@ -606,7 +612,7 @@ def filter_data(hed_background_dir, hed_dir, product_images):
         for img_name, img_path in zip(image_filename_list, images_path):
             if img_name not in product_images:
                 img2 = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-                img2[img2 > 60] = 180
+                img2[img2 > 60] = args.hed_value
                 img2[img2 <= 60] = 0
                 ret2, thresh2 = cv2.threshold(img2, 127, 255,0)
                 contours2, hierarchy2 = cv2.findContours(thresh2,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -640,7 +646,7 @@ def make_mask_contour(img_shape: tuple, contour: Union[list, np.ndarray]) -> np.
     return mask
 
 ## function for saving product hed as transparent png
-def product_hed_transparent_bg(product_images, data_hed_background_dir):
+def product_hed_transparent_bg(args, product_images, data_hed_background_dir):
 
     ## create data_hed_transparent_dir
     image_dirs = data_hed_background_dir.split('/')
@@ -655,7 +661,7 @@ def product_hed_transparent_bg(product_images, data_hed_background_dir):
                         for file_path in image_filename_list]
 
     img1 = cv2.imread(os.path.join(data_hed_background_dir, product_images[0]), cv2.IMREAD_GRAYSCALE)
-    img1[img1 > 60] = 180
+    img1[img1 > 60] = args.hed_value
     img1[img1 <= 60] = 0
     ret1, thresh1 = cv2.threshold(img1, 127, 255,0)
     contours1,hierarchy1 = cv2.findContours(thresh1,2,1)
@@ -666,7 +672,7 @@ def product_hed_transparent_bg(product_images, data_hed_background_dir):
     for img_name, img_path in zip(image_filename_list, images_path):
         #print(f'img_name={img_name}')
         img2 = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-        img2[img2 > 60] = 180
+        img2[img2 > 60] = args.hed_value
         img2[img2 <= 60] = 0
         ret2, thresh2 = cv2.threshold(img2, 127, 255,0)
         contours2, hierarchy2 = cv2.findContours(thresh2,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -717,7 +723,7 @@ def product_hed_transparent_bg(product_images, data_hed_background_dir):
 
 
 ## check whether hed is over-extracted
-def examine_image_hed(product_images, data_dir, data_hed_dir, data_similarity_dict, similarity_threshold = 0.916, device='cuda'):
+def examine_image_hed(args, product_images, data_dir, data_hed_dir, data_similarity_dict, similarity_threshold = 0.916, device='cuda'):
   large_value = 100
 
   image_filename_list = [i for i in os.listdir(data_hed_dir)]
@@ -728,7 +734,7 @@ def examine_image_hed(product_images, data_dir, data_hed_dir, data_similarity_di
   img_similarity_dict_all = {}
   for product_image in product_images:
       img1 = cv2.imread(os.path.join(data_hed_dir, product_image), cv2.IMREAD_GRAYSCALE)
-      img1[img1 > 60] = 180
+      img1[img1 > 60] = args.hed_value
       img1[img1 <= 60] = 0
       ret1, thresh1 = cv2.threshold(img1, 127, 255,0)
       contours1,hierarchy1 = cv2.findContours(thresh1,2,1)
@@ -739,7 +745,7 @@ def examine_image_hed(product_images, data_dir, data_hed_dir, data_similarity_di
       for img_name, img_path in zip(image_filename_list, images_path):
           if img_name not in product_images:
               img2 = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-              img2[img2 > 60] = 180
+              img2[img2 > 60] = args.hed_value
               img2[img2 <= 60] = 0
               ret2, thresh2 = cv2.threshold(img2, 127, 255,0)
               contours2,hierarchy2 = cv2.findContours(thresh2,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -866,7 +872,7 @@ def image_outline_re_extraction_by_mask_multiple_product_types(data_dir, output_
     img = img.resize((image_dim, image_dim), Image.LANCZOS)
     image_array = np.asarray(img)
 
-    white_array = np.ones_like(image_array) * 180
+    white_array = np.ones_like(image_array) * args.hed_value
     white_array = white_array * mask_all
     white_array = white_array * mask
 
@@ -905,7 +911,7 @@ def image_outline_re_extraction_by_mask_multiple_product_types(data_dir, output_
       tmp_mask = cv2.dilate(tmp_mask, kernel, iterations=3)
       tmp_mask = np.array(tmp_mask, dtype=bool)
 
-      tmp_white_array = np.ones_like(image_array) * 180
+      tmp_white_array = np.ones_like(image_array) * args.hed_value
       tmp_white_array = tmp_white_array * individual_mask
       tmp_white_array = tmp_white_array * tmp_mask
       hed = np.where(tmp_white_array>0, tmp_white_array, hed)
@@ -923,12 +929,12 @@ def image_outline_re_extraction_by_mask_multiple_product_types(data_dir, output_
 if __name__ == "__main__":
     args = parse_args()
     device = torch.device(args.gpu_id)
-    product_outline_extraction_by_mask_multiple_product_types(args.input_dir, args.output_dir, args.img_format, device=device)
+    product_outline_extraction_by_mask_multiple_product_types(args, args.input_dir, args.output_dir, args.img_format, device=device)
     print(f'similarity={args.similarity_threshold}')
     print(f'args.product_images={args.product_images}, len(args.product_images)={len(args.product_images)}')
     if len(args.product_images) > 0:
-       data_similarity_dict_all = filter_data(args.output_dir, args.data_hed_dir, args.product_images)
-       data_hed_bg_original = filter_hed(args.output_dir, data_similarity_dict_all, args.similarity_threshold, args.product_images)
-       examine_image_hed(args.product_images, args.input_dir, args.data_hed_dir, data_similarity_dict_all, args.similarity_threshold, device=device)
-       product_hed_transparent_bg(args.product_images, data_hed_bg_original)
+       data_similarity_dict_all = filter_data(args, args.output_dir, args.data_hed_dir, args.product_images)
+       data_hed_bg_original = filter_hed(args, args.output_dir, data_similarity_dict_all, args.similarity_threshold, args.product_images)
+       examine_image_hed(args, args.product_images, args.input_dir, args.data_hed_dir, data_similarity_dict_all, args.similarity_threshold, device=device)
+       product_hed_transparent_bg(args, args.product_images, data_hed_bg_original)
     print(f'process finished.')
