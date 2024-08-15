@@ -124,13 +124,14 @@ def load_model_hf(repo_id, filename, ckpt_config_filename):
 
 
 # detect object using grounding DINO
-def detect(image, image_source, text_prompt, model, box_threshold = 0.3, text_threshold = 0.25):
+def detect(image, image_source, text_prompt, model, box_threshold = 0.3, text_threshold = 0.25, device='cuda'):
   boxes, logits, phrases = predict(
       model=model,
       image=image,
       caption=text_prompt,
       box_threshold=box_threshold,
-      text_threshold=text_threshold
+      text_threshold=text_threshold,
+      device=device
   )
 
   annotated_frame = annotate(image_source=image_source, boxes=boxes, logits=logits, phrases=phrases)
@@ -194,7 +195,7 @@ def product_outline_extraction_by_mask(intput_dir, output_dir, img_format = 'png
         #####################################
         #extract mask
         image_source, image = load_image(img_path, image_dim)
-        _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model)
+        _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model, device=device)
         mask_all = np.full((image_source.shape[1],image_source.shape[1]), True, dtype=bool)
         
         if detected_boxes.size(0) != 0:
@@ -275,7 +276,7 @@ def hed_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_fo
         product_types = ["beauty product", "cosmetic product", "skincare product", "makeup product"]
         mask_all = np.full((image_source.shape[1],image_source.shape[1]), True, dtype=bool)
         for product_type in product_types:
-            _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model)
+            _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model, device=device)
             if detected_boxes.size(0) != 0:
                 segmented_frame_masks = segment(image_source, sam_predictor, boxes=detected_boxes, device=device)
 
@@ -376,7 +377,7 @@ def product_outline_extraction_by_mask_multiple_product_types(args, intput_dir, 
         product_types = ["beauty product", "cosmetic product", "skincare product", "makeup product"]
         mask_all = np.full((image_source.shape[1],image_source.shape[1]), True, dtype=bool)
         for product_type in product_types:
-            _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model)
+            _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model, device=device)
             if detected_boxes.size(0) != 0:
                 segmented_frame_masks = segment(image_source, sam_predictor, boxes=detected_boxes, device=device)
 
@@ -862,7 +863,7 @@ def image_outline_re_extraction_by_mask_multiple_product_types(data_dir, output_
     mask_all = np.full((image_source.shape[1],image_source.shape[1]), True, dtype=bool)
     individual_masks = []
     for product_type in product_types:
-        _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model)
+        _, detected_boxes = detect(image, image_source, text_prompt=product_type, model=groundingdino_model, device=device)
 
         if detected_boxes.size(0) != 0:
             segmented_frame_masks = segment(image_source, sam_predictor, boxes=detected_boxes, device=device)
