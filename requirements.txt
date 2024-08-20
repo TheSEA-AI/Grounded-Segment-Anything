@@ -1,5 +1,5 @@
 addict
-diffusers
+#diffusers
 gradio
 huggingface_hub
 matplotlib
