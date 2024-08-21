@@ -392,7 +392,7 @@ def product_outline_extraction_by_mask_multiple_product_types(args, intput_dir, 
                         continue
                     mask_all = mask_all & ~mask[0].cpu().numpy()
             else:
-                raise ValueError("the product cannot be extracted.")
+                raise ValueError(f"the product outline in {img_name} cannot be extracted.")
 
 
         ##### fill holes inside product #######
