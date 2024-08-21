@@ -268,7 +268,6 @@ def image_outline_extraction_by_mask_multiple_product_types(args, intput_dir, ou
 
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     
-
     ckpt_repo_id = "ShilongLiu/GroundingDINO"
     ckpt_filenmae = "groundingdino_swinb_cogcoor.pth"
     ckpt_config_filename = "GroundingDINO_SwinB.cfg.py"
