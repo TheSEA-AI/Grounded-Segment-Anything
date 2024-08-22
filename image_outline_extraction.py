@@ -371,7 +371,8 @@ def image_outline_extraction_by_mask_multiple_product_types(args, intput_dir, ou
 ##### for extracting hed images where the inner lines of produts are removed
 if __name__ == "__main__":
     args = parse_args()
-    device = torch.device(args.gpu_id)
+    #device = torch.device(args.gpu_id)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f'device={device}')
     image_outline_extraction_by_mask_multiple_product_types(args, args.input_dir, args.output_dir, args.img_format, device=device)
     print(f'image outline extraction process finished.')
