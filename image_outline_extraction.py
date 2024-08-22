@@ -116,7 +116,7 @@ def detect(image, image_source, text_prompt, model, box_threshold = 0.3, text_th
       caption=text_prompt,
       box_threshold=box_threshold,
       text_threshold=text_threshold,
-      device = device
+      #device = device
   )
 
   annotated_frame = annotate(image_source=image_source, boxes=boxes, logits=logits, phrases=phrases)
@@ -372,6 +372,7 @@ def image_outline_extraction_by_mask_multiple_product_types(args, intput_dir, ou
 if __name__ == "__main__":
     args = parse_args()
     device = torch.device(args.gpu_id)
+    #args.gpu_id=os.environ["CUDA_VISIBLE_DEVICES"]
     #device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f'device={device}')
     image_outline_extraction_by_mask_multiple_product_types(args, args.input_dir, args.output_dir, args.img_format, device=device)
