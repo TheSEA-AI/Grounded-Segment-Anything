@@ -151,44 +151,6 @@ def draw_mask(mask, image, random_color=True):
 
     return np.array(Image.alpha_composite(annotated_frame_pil, mask_image_pil))
 
-def get_product_position(mask):
-  row_position = 0
-  col_position = 0
-  for row in range(0,mask.shape[0]):
-    if any(x == False for x in mask[row,:]):
-      row_position = row
-      break
-
-  for column in range(0,mask.shape[1]):
-    if any(x == False for x in mask[:,column]):
-      col_position = column
-      break
-  return row_position, col_position
-
-
-def hed_extration(intput_dir, output_dir, img_format = 'png', image_resolution = 1024):
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-    
-    image_filename_list = [i for i in os.listdir(intput_dir)]
-    images_path = [os.path.join(intput_dir, file_path)
-                        for file_path in image_filename_list]
-
-    hedDetector = HEDdetector()
-    image_dim = 1024
-    for img_path, img_name in zip(images_path, image_filename_list):
-        img = Image.open(img_path).convert("RGB")
-        img = img.resize((image_dim, image_dim), Image.LANCZOS)
-        image_array = np.asarray(img)
-
-        hed = HWC3(image_array)
-        hed = hedDetector(hed)
-        hed = HWC3(hed)
-
-        hed = cv2.resize(hed, (image_resolution, image_resolution),interpolation=cv2.INTER_LINEAR)
-        img_masked = Image.fromarray(hed)
-        img_save_path = output_dir + '/' + img_name
-        img_masked.save(img_save_path, img_format)
-
 ##the latest version with multiple product types and filling holes etc.
 ##the holes are becasue of SAM noise
 def image_outline_extraction_by_mask_multiple_product_types(args, intput_dir, output_dir, img_format = 'png', image_resolution = 1024, device='cuda'):
