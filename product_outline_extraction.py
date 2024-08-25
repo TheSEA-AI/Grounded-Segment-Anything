@@ -94,7 +94,7 @@ def parse_args(input_args=None):
                         help="The threshold to remove hed images")
 
     parser.add_argument("--hed_value", 
-                        default=190, 
+                        default=200, 
                         type=int, 
                         required=False,
                         help="The hed value for product")
@@ -312,8 +312,8 @@ def hed_extraction_by_mask_multiple_product_types(intput_dir, output_dir, img_fo
         ##### flip surrounding pixels due to previous fill small holes outside product #######
         mask_all[0:ite+2, :] = True
         mask_all[:, 0:ite+2] = True
-        mask_all[1024-ite-1:1024, :] = True
-        mask_all[:, 1024-ite-1:1024] = True
+        mask_all[1024-ite-1:, :] = True
+        mask_all[:, 1024-ite-1:] = True
         ##### flip surrounding pixels due to previous fill small holes outside product #######
 
         mask_all = np.stack((mask_all,)*3, axis=-1)
@@ -413,8 +413,8 @@ def product_outline_extraction_by_mask_multiple_product_types(args, intput_dir, 
         ##### flip surrounding pixels due to previous fill small holes outside product #######
         mask_all[0:ite+2, :] = True
         mask_all[:, 0:ite+2] = True
-        mask_all[1024-ite-1:1024, :] = True
-        mask_all[:, 1024-ite-1:1024] = True
+        mask_all[1024-ite-1:, :] = True
+        mask_all[:, 1024-ite-1:] = True
         ##### flip surrounding pixels due to previous fill small holes outside product #######
 
         mask_all = np.stack((mask_all,)*3, axis=-1)
@@ -901,8 +901,8 @@ def image_outline_re_extraction_by_mask_multiple_product_types(data_dir, output_
     ##### flip surrounding pixels due to previous fill small holes outside product #######
     mask_all[0:ite+2, :] = True
     mask_all[:, 0:ite+2] = True
-    mask_all[1024-ite-1:1024, :] = True
-    mask_all[:, 1024-ite-1:1024] = True
+    mask_all[1024-ite-1:, :] = True
+    mask_all[:, 1024-ite-1:] = True
     ##### flip surrounding pixels due to previous fill small holes outside product #######
 
     mask_all = np.stack((mask_all,)*3, axis=-1)

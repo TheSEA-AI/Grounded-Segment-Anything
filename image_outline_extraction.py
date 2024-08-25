@@ -79,7 +79,7 @@ def parse_args(input_args=None):
                         help="gpu id")
 
     parser.add_argument("--hed_value", 
-                        default=190, 
+                        default=200, 
                         type=int, 
                         required=False,
                         help="The hed value for product")
@@ -333,8 +333,8 @@ def image_outline_extraction_by_mask_multiple_product_types(args, intput_dir, ou
         ##### flip surrounding pixels due to previous fill small holes outside product #######
         mask_all[0:ite+2, :] = True
         mask_all[:, 0:ite+2] = True
-        mask_all[1024-ite-1:1024, :] = True
-        mask_all[:, 1024-ite-1:1024] = True
+        mask_all[1024-ite-1:, :] = True
+        mask_all[:, 1024-ite-1:] = True
         ##### flip surrounding pixels due to previous fill small holes outside product #######
 
         mask_all = np.stack((mask_all,)*3, axis=-1)
