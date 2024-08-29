@@ -94,7 +94,7 @@ def parse_args(input_args=None):
                         help="The threshold to remove hed images")
     
     parser.add_argument("--hed_value", 
-                        default=190, 
+                        default=180, 
                         type=int, 
                         required=False,
                         help="The hed value for product")

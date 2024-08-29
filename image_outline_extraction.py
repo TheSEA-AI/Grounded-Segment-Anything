@@ -79,7 +79,7 @@ def parse_args(input_args=None):
                         help="gpu id")
 
     parser.add_argument("--hed_value", 
-                        default=200, 
+                        default=180, 
                         type=int, 
                         required=False,
                         help="The hed value for product")
